@@ -1,0 +1,10 @@
+.layer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+}
+
+button {
+    padding: 0;
+}
