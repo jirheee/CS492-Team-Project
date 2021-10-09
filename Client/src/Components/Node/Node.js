@@ -1,7 +1,11 @@
 import "./Node.css";
 
 const Node = () => {
-    return <div className="node"/>
-}
+  return (
+    <div className="nodeContainer">
+      <div className="node" />
+    </div>
+  );
+};
 
-export default Node
+export default Node;

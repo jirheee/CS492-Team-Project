@@ -20,12 +20,18 @@ const Layer = () => {
 
   return (
     <div className="layer">
-      <IconButton aria-label="Add" onClick={IncreaseNodes} color="primary">
-        <AddCircle />
-      </IconButton>
-      <IconButton aria-label="Delete" onClick={DecreaseNodes} color="secondary">
-        <RemoveCircle />
-      </IconButton>
+      <div>
+        <IconButton aria-label="Add" onClick={IncreaseNodes} color="primary">
+          <AddCircle />
+        </IconButton>
+        <IconButton
+          aria-label="Delete"
+          onClick={DecreaseNodes}
+          color="secondary"
+        >
+          <RemoveCircle />
+        </IconButton>
+      </div>
       {Nodes}
     </div>
   );
