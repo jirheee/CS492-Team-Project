@@ -2,22 +2,33 @@ from typing import Optional
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+import socketio
+
+
 
 class Item(BaseModel):
     name: str
     price: float
     is_offer: Optional[bool] = None
 
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='asgi')
 app = FastAPI()
+socketio_app = socketio.ASGIApp(sio, app)
 
 @app.get("/ping")
 def read_root():
     return {"message": "pong"}
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+@sio.event
+def connect(sid, environ):
+    print("connect ", sid)
 
-@app.put("/items/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_name": item.name, "item_id": item_id}
+
+@sio.on('message')
+async def chat_message(sid, data):
+    print("message ", data)
+    await sio.emit('response', 'hi ' + data)
+
+@sio.event
+def disconnect(sid):
+    print('disconnect ', sid)
