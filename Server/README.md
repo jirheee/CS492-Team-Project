@@ -13,3 +13,6 @@ pip install 'uvicorn[standard]'
 After installing, run `uvicorn main:app --reload` in src directory to run server.(`--reload` option will let you auto-reload server after any modification happened in src.)
 
 You can check your server by sending `GET /ping` on localhost:8000. If it is running, it will send you back "pong".
+
+## Documentation
+You can see auto-generated api docs by going to http://localhost:8000/docs.
