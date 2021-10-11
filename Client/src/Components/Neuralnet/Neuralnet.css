@@ -1,0 +1,8 @@
+.neural-net {
+  width: 500px;
+  height: 500px;
+}
+
+.neural-net > rect:hover {
+  fill: aliceblue;
+}

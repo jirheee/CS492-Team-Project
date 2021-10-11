@@ -1,9 +1,11 @@
-import Network from "../Components/Network/Network";
+import NeuralNet from "../Components/Neuralnet/Neuralnet";
 
 const ConfigurationPage = () => {
-    return <>
-        <Network/>
+  return (
+    <>
+      <NeuralNet />
     </>
-}
+  );
+};
 
 export default ConfigurationPage;
