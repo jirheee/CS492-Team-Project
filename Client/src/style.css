@@ -1,0 +1,13 @@
+.HoverBoxBtnConatiner {
+  width: 100%;
+  height: 350px;
+  background-color: black;
+  fill-opacity: 0.3;
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset;
+}

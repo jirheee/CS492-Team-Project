@@ -1,9 +1,4 @@
-import ConfigurationPage from "./ConfigurationPage";
-import TrainingPage from "./TrainingPage";
+import BattlePage from "./BattlePage";
+import ModelPage from "./ModelPage";
 import HomePage from "./HomePage";
-
-export {
-    ConfigurationPage,
-    TrainingPage,
-    HomePage
-}
+export { BattlePage, ModelPage, HomePage };
