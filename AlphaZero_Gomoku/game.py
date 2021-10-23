@@ -187,7 +187,7 @@ class Game(object):
         """
         self.board.init_board()
         p1, p2 = self.board.players
-        states, actions, next_states, dones, current_players = [], [], [], [], []
+        states, actions, next_states, dones, rewards = [], [], [], [], []
         while True:
             action, action_probs = player.get_action(self.board,
                                                  temp=temp,
@@ -195,7 +195,6 @@ class Game(object):
             # store the data
             states.append(self.board.current_state())
             actions.append(action)
-            current_players.append(self.board.current_player)
             # perform a move
             self.board.do_move(action)
             next_states.append(self.board.current_state())
@@ -205,15 +204,19 @@ class Game(object):
             dones.append(end)
 
             if end:
-                # winner from the perspective of the current player of each state
-                winners_z = np.zeros(len(current_players))
                 if winner != -1:
-                    winners_z[np.array(current_players) == winner] = 1.0
-                    winners_z[np.array(current_players) != winner] = -1.0
-                    
+                    if winner == 0:
+                        rewards.append(-1.0)
+                    else:
+                        rewards.append(1.0)
+                else:
+                    rewards.append(0.0)
+
                 if is_shown:
                     if winner != -1:
                         print("Game end. Winner is player:", winner)
                     else:
                         print("Game end. Tie")
-                return winner, zip(states, actions, next_states, dones, current_players)
+                return winner, zip(states, actions, next_states, rewards, dones)
+            else:
+                rewards.append(0.0)

@@ -39,7 +39,7 @@ class TrainPipeline():
         if data["rl_algorithm"] == 'DQN':
             self.player = DQNPlayer(self.nn_architecture, lr=self.lr)
 
-        self.check_freq = 100 # Checkpoint for evaluation
+        self.check_freq = 1000 # Checkpoint for evaluation
         self.temp = 1.0  # the temperature param
         self.best_win_ratio = 0.0
 
