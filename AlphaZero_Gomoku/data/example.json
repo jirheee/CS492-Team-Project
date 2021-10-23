@@ -1,0 +1,15 @@
+{
+    "board": {
+        "board_width": 6,
+        "board_height": 6,
+        "n_in_row": 4
+    },
+    "hyperparameters": {
+        "lr": 1e-3,
+        "buffer_size": 10000,
+        "batch_size": 512,
+        "epochs": 500
+    },
+    "nn_architecture": "Conv",
+    "rl_algorithm": "DQN"
+}
