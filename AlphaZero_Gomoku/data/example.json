@@ -8,7 +8,7 @@
         "lr": 1e-3,
         "buffer_size": 10000,
         "batch_size": 512,
-        "epochs": 500
+        "epochs": 1000
     },
     "nn_architecture": "Conv",
     "rl_algorithm": "DQN"
