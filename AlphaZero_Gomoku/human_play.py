@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-human VS AI models
-Input your move in the format: 2,3
-
-@author: Junxiao Song
-"""
-
-from __future__ import print_function
-import pickle
 from game import Board, Game
 from nn_architecture import Conv
 from rl_algorithm import DQNPlayer
