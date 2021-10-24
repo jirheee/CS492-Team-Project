@@ -49,14 +49,14 @@ class DQNPlayer(nn.Module):
             self.eps = self.eps_threshold
 
         sensible_moves = board.availables
-        move_probs = self.main_network(state) 
+        move_probs = torch.flatten(self.main_network(state)[:,36:])
         trial = 0
         if len(sensible_moves) > 0:
             if random.random() < self.eps:
                 move = random.sample(sensible_moves, 1)[0]
             else:
                 move = torch.argmax(move_probs).item()
-                moves_sorted = torch.argsort(move_probs, descending=True)[0]
+                moves_sorted = torch.argsort(move_probs, descending=True)
                 while move not in sensible_moves: 
                     trial += 1
                     move = moves_sorted[trial].item()

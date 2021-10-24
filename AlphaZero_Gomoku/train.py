@@ -92,14 +92,14 @@ class TrainPipeline():
                 # check the performance of the current model,
                 # and save the model params
                 if (i+1) % self.check_freq == 0:
-                    print(f"current self-play batch: {i+1}")
+                    print(f"\ncurrent self-play batch: {i+1}")
                     win_ratio = self.policy_evaluate()
                     self.player.save_model(f'./model/current_dqn_conv.model')
                     if win_ratio > self.best_win_ratio:
                         print("New best policy!!!!!!!!")
                         self.best_win_ratio = win_ratio
                         # update the best_policy
-                        self.policy_value_net.save_model(f'./model/best_dqn_conv.model')
+                        self.player.save_model(f'./model/best_dqn_conv.model')
                         if self.best_win_ratio == 1.0:
                             self.best_win_ratio = 0.0
             print('Train Completed!')
