@@ -20,18 +20,21 @@ class Conv(nn.Module):
             nn.ReLU(),
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(128, 2, kernel_size=1),
+            nn.Conv2d(128, 1, kernel_size=1),
             nn.ReLU(),
         )
 
         self.fc_layers = nn.Sequential(
-            nn.Linear(2*self.board_width*self.board_height, 64),
+            nn.Linear(self.board_width*self.board_height, 128),
             nn.ReLU(),
-            nn.Linear(64, 1),
-            nn.Tanh()
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Linear(128, self.board_width*self.board_height),
+            nn.Sigmoid()
         )
     
     def forward(self, state):
         output = self.conv_layers(state)
-        output = output.view(-1, 2*self.board_width*self.board_height)
+        output = output.view(-1, self.board_width*self.board_height)
+        output = self.fc_layers(output)
         return output

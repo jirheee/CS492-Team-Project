@@ -32,7 +32,7 @@ class DQNPlayer(nn.Module):
         update_model(self.main_network, self.target_network, tau=1.0)
         self.tau = tau
         self.step = 0
-        self.update_step = 1000
+        self.update_step = 200
 
         self.criterion = nn.MSELoss()
         self.optimizer = optim.Adam(self.main_network.parameters(), lr=self.lr)
@@ -49,7 +49,7 @@ class DQNPlayer(nn.Module):
             self.eps = self.eps_threshold
 
         sensible_moves = board.availables
-        move_probs = torch.flatten(self.main_network(state)[:,36:])
+        move_probs = torch.flatten(self.main_network(state))
         trial = 0
         if len(sensible_moves) > 0:
             if random.random() < self.eps:

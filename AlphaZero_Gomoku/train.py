@@ -42,6 +42,7 @@ class TrainPipeline():
         self.check_freq = 1000 # Checkpoint for evaluation
         self.temp = 1.0  # the temperature param
         self.best_win_ratio = 0.0
+        self.train_step = 10
 
     def collect_selfplay_data(self, n_games=1):
         """collect self-play data for training"""
@@ -55,8 +56,11 @@ class TrainPipeline():
 
     def policy_update(self, epoch):
         """update the policy-value net"""
-        mini_batch = random.sample(self.data_buffer, self.batch_size)
-        loss = self.player.train(mini_batch)
+        loss = 0.0
+        for _ in range(self.train_step):
+            mini_batch = random.sample(self.data_buffer, self.batch_size)
+            loss += self.player.train(mini_batch)
+        loss /= self.train_step
         return loss
         
 
