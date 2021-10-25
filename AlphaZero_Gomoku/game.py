@@ -201,13 +201,13 @@ class Game(object):
             if is_shown:
                 self.graphic(self.board, p1, p2)
             end, winner = self.board.game_end()
+            if len(dones)>0:
+                dones[-1]=end
             dones.append(end)
 
             if end:
                 if winner != -1:
-                    if winner == 0:
-                        rewards.append(-1.0)
-                    else:
+                        rewards[-1]=-1
                         rewards.append(1.0)
                 else:
                     rewards.append(0.0)

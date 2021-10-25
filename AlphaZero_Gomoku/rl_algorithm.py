@@ -84,7 +84,7 @@ class DQNPlayer(nn.Module):
         target_q_values = rewards + self.gamma * next_q_values.detach()
 
         printable = lambda x: np.array2string(x.to('cpu').flatten().detach().clone().numpy(),precision = 2)
-        mse_loss = self.criterion(target_q_values, current_q_values)
+        mse_loss = self.criterion(current_q_values, target_q_values)
         self.optimizer.zero_grad()
         mse_loss.backward()
         self.optimizer.step()
