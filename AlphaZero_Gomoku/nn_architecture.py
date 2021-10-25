@@ -10,6 +10,8 @@ class Conv(nn.Module):
         super(Conv, self).__init__()
         torch.set_default_dtype(torch.float64)
 
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         self.board_width = board_width
         self.board_height = board_height
 
@@ -30,11 +32,12 @@ class Conv(nn.Module):
             nn.Linear(128, 128),
             nn.ReLU(),
             nn.Linear(128, self.board_width*self.board_height),
-            nn.Sigmoid()
+            nn.Sigmoid(),
+            #nn.Softmax(dim=1)
         )
     
     def forward(self, state):
-        output = self.conv_layers(state)
-        output = output.view(-1, self.board_width*self.board_height)
+        output = self.conv_layers(state).to(self.device)
+        output = output.view(-1, self.board_width*self.board_height).to(self.device)
         output = self.fc_layers(output)
         return output
