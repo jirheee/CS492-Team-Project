@@ -1,0 +1,34 @@
+{
+    "nn_information":{
+        "n_layers": 4,
+        "layer_0": {
+            "layer_name": "Conv",
+            "channels": 32,
+            "kernel_size": 3,
+            "stride": 1,
+            "padding": 1
+        },
+        "layer_1": {
+            "layer_name": "Conv",
+            "channels": 64,
+            "kernel_size": 3,
+            "stride": 1,
+            "padding": 1
+        },
+        "layer_2": {
+            "layer_name": "Conv",
+            "channels": 128,
+            "kernel_size": 3,
+            "stride": 1,
+            "padding": 1
+        },
+        "layer_3": {
+            "layer_name": "Conv",
+            "channels": 2,
+            "kernel_size": 1,
+            "stride": 1,
+            "padding": 0
+        },
+        "activ_func": "ReLU"
+    }
+}

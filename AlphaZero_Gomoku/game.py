@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Junxiao Song
+"""
+
+from __future__ import print_function
 import numpy as np
 
 
@@ -187,36 +193,31 @@ class Game(object):
         """
         self.board.init_board()
         p1, p2 = self.board.players
-        states, actions, next_states, dones, rewards = [], [], [], [], []
+        states, mcts_probs, current_players = [], [], []
         while True:
-            action, action_probs = player.get_action(self.board,
+            move, move_probs = player.get_action(self.board,
                                                  temp=temp,
                                                  return_prob=1)
             # store the data
             states.append(self.board.current_state())
-            actions.append(action)
+            mcts_probs.append(move_probs)
+            current_players.append(self.board.current_player)
             # perform a move
-            self.board.do_move(action)
-            next_states.append(self.board.current_state())
+            self.board.do_move(move)
             if is_shown:
                 self.graphic(self.board, p1, p2)
             end, winner = self.board.game_end()
-            if len(dones)>0:
-                dones[-1]=end
-            dones.append(end)
-
             if end:
+                # winner from the perspective of the current player of each state
+                winners_z = np.zeros(len(current_players))
                 if winner != -1:
-                        rewards[-1]=-1
-                        rewards.append(1.0)
-                else:
-                    rewards.append(0.0)
-
+                    winners_z[np.array(current_players) == winner] = 1.0
+                    winners_z[np.array(current_players) != winner] = -1.0
+                # reset MCTS root node
+                player.reset_player()
                 if is_shown:
                     if winner != -1:
                         print("Game end. Winner is player:", winner)
                     else:
                         print("Game end. Tie")
-                return winner, zip(states, actions, next_states, rewards, dones)
-            else:
-                rewards.append(0.0)
+                return winner, zip(states, mcts_probs, winners_z)

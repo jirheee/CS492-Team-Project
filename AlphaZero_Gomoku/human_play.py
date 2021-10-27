@@ -1,6 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+human VS AI models
+Input your move in the format: 2,3
+
+@author: Junxiao Song
+"""
+
+import json
+import torch
+
 from game import Board, Game
-from nn_architecture import Conv
-from rl_algorithm import DQNPlayer
+from mcts_pure import MCTSPlayer as MCTS_Pure
+from mcts_alphaZero import MCTSPlayer
+from nn_architecture import PolicyValueNet
 
 
 class Human(object):
@@ -31,24 +43,36 @@ class Human(object):
         return "Human {}".format(self.player)
 
 
-def run():
-    n = 5
-    width, height = 8, 8
-    model_file = './model/current_dqn_conv.model'
+def run(data):
+    n = 4
+    width, height = 6, 6
+    model_file = './model/best_policy.model'
+    f = open(data, encoding='utf-8')
+    data = json.loads(f.read())
+
     try:
         board = Board(width=width, height=height, n_in_row=n)
         game = Game(board)
 
         # ############### human VS AI ###################
-        nn_architecture = Conv(width, height)
-        ai_player = DQNPlayer(nn_architecture)
+        # load the trained policy_value_net in either Theano/Lasagne, PyTorch or TensorFlow
+        best_policy = PolicyValueNet(width, height, data["nn_information"], model_file=model_file)
+        mcts_player = MCTSPlayer(best_policy.policy_value_fn,
+                                 c_puct=5,
+                                 n_playout=400)  # set larger n_playout for better performance
+
+        # uncomment the following line to play with pure MCTS (it's much weaker even with a larger n_playout)
+        # mcts_player = MCTS_Pure(c_puct=5, n_playout=1000)
+
+        # human player, input your move in the format: 2,3
         human = Human()
 
         # set start_player=0 for human first
-        game.start_play(human, ai_player, start_player=1, is_shown=1)
+        game.start_play(human, mcts_player, start_player=1, is_shown=1)
     except KeyboardInterrupt:
         print('\n\rquit')
 
 
 if __name__ == '__main__':
-    run()
+    data = './data/battle_example.json'
+    run(data)
