@@ -15,5 +15,7 @@
 - n_layers: `int`, Number of layers
 - layer_0, ..., layer_n: Information for layers
     if layer_name == 'Conv':
-        channels, kernel_size, stride, padding information required(type: `int`)
+        channels, kernel_size, stride, padding, bias information required(type: `int` except bias term: `str`)
+    if layer_name == 'BatchNorm':
+        no additional information required
 - activ_func: [`ReLU`, `Sigmoid`, `Tanh`, `LeakyReLU`], Activation Function 

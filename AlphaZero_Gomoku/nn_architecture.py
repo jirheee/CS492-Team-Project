@@ -35,14 +35,17 @@ class NeuralNet(nn.Module):
                 kernel_size = layer_information["kernel_size"]
                 stride = layer_information["stride"]
                 padding = layer_information["padding"]
+                bias = True if layer_information['bias'] == "True" else False
                 self.layers.append(nn.Conv2d(prev_channels, channels,
-                                             kernel_size=kernel_size, stride=stride, padding=padding))
+                                             kernel_size=kernel_size, stride=stride, padding=padding, bias=bias))
                 width = (prev_width - kernel_size + 1 + padding * 2) // stride
                 height = (prev_height - kernel_size + 1 + padding * 2) // stride
                 input_sizes.append((channels, width, height))
                 prev_channels = channels
                 prev_width = width
                 prev_height = height
+            elif layer_information["layer_name"] == "BatchNorm":
+                self.layers.append(nn.BatchNorm2d(input_sizes[-1][0]))
             else:
                 NotImplementedError()
         
