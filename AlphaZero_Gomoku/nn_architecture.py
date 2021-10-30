@@ -25,7 +25,9 @@ class NeuralNet(nn.Module):
         # Consturct Neural Network
         self.layers = nn.ModuleList()
         prev_channels = 4
-        input_sizes = [(4, self.board_width, self.board_height)]
+        prev_width = self.board_width
+        prev_height = self.board_height
+        input_sizes = [(prev_channels, prev_width, prev_height)]
         for i in range(nn_information['n_layers']):
             layer_information = nn_information.get(f"layer_{i}")
             if layer_information["layer_name"] == "Conv":
@@ -35,9 +37,12 @@ class NeuralNet(nn.Module):
                 padding = layer_information["padding"]
                 self.layers.append(nn.Conv2d(prev_channels, channels,
                                              kernel_size=kernel_size, stride=stride, padding=padding))
-                input_sizes.append((channels, (self.board_width - kernel_size + 1 + padding * 2) // stride,
-                                              (self.board_height - kernel_size + 1 + padding * 2) // stride))
+                width = (prev_width - kernel_size + 1 + padding * 2) // stride
+                height = (prev_height - kernel_size + 1 + padding * 2) // stride
+                input_sizes.append((channels, width, height))
                 prev_channels = channels
+                prev_width = width
+                prev_height = height
             else:
                 NotImplementedError()
         
