@@ -46,7 +46,7 @@ class Human(object):
 def run(data):
     n = 4
     width, height = 6, 6
-    model_file = './model/best_policy.model'
+    model_file = './model/best_policy_gnn.model'
     f = open(data, encoding='utf-8')
     data = json.loads(f.read())
 
@@ -65,7 +65,8 @@ def run(data):
         # mcts_player = MCTS_Pure(c_puct=5, n_playout=1000)
 
         # human player, input your move in the format: 2,3
-        human = Human()
+        best_policy_ = PolicyValueNet(width, height, data["nn_information"], model_file=model_file)
+        human =  Human()
 
         # set start_player=0 for human first
         game.start_play(human, mcts_player, start_player=1, is_shown=1)
@@ -74,5 +75,5 @@ def run(data):
 
 
 if __name__ == '__main__':
-    data = './data/battle_example.json'
+    data = './data/battle_example_gnn.json'
     run(data)

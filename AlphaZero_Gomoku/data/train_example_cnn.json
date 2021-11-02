@@ -11,6 +11,7 @@
         "epochs": 100
     },
     "nn_information":{
+        "nn_type": "CNN",
         "n_layers": 4,
         "layer_0": {
             "layer_name": "Conv",

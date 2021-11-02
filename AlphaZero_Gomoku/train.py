@@ -7,6 +7,7 @@ An implementation of the training pipeline of AlphaZero for Gomoku
 
 import json
 import random
+import datetime
 import numpy as np
 from tqdm import tqdm
 from collections import defaultdict, deque
@@ -18,7 +19,7 @@ from nn_architecture import PolicyValueNet
 from torch.utils.tensorboard import SummaryWriter
 
 class TrainPipeline():
-    def __init__(self, data='./data/train_example.json'):
+    def __init__(self, data='./data/train_example_gnn.json'):
         # load data from json file
         f = open(data, encoding='utf-8')
         data = json.loads(f.read())

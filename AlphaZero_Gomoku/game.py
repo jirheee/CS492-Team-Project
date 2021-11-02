@@ -3,8 +3,10 @@
 @author: Junxiao Song
 """
 
-from __future__ import print_function
 import numpy as np
+
+import torch
+from torch_geometric.data import Data
 
 
 class Board(object):
@@ -31,6 +33,42 @@ class Board(object):
         self.states = {}
         self.last_move = -1
 
+    def get_gnn_state(self, x):
+        x = np.array(x).reshape(4, self.width*self.height).T
+        global_x = np.zeros((1, 4))
+        x = np.concatenate((x, global_x), axis=0)
+
+        edge_index = [[], []]
+        for i in range(self.width * self.height):
+            if i % self.width == 0:
+                if i // self.height == 0:
+                    edge_index[0] += [i, i, i+1, i+self.width]
+                    edge_index[1] += [i+1, i+self.width, i, i]
+                elif i // self.height == self.height - 1:
+                    edge_index[0] += [i, i, i+1, i-self.width]
+                    edge_index[1] += [i+1, i-self.width, i, i]
+                else:
+                    edge_index[0] += [i, i, i, i-self.width, i+1, i+self.width]
+                    edge_index[1] += [i-self.width, i+1, i+self.width, i, i, i]
+            elif i % self.width == self.width-1:
+                if i // self.height == 0:
+                    edge_index[0] += [i, i, i-1, i+self.width]
+                    edge_index[1] += [i-1, i+self.width, i, i]
+                elif i // self.height == self.height - 1:
+                    edge_index[0] += [i, i, i-1, i-self.width]
+                    edge_index[1] += [i-1, i-self.width, i, i]
+                else:
+                    edge_index[0] += [i, i, i, i-self.width, i-1, i+self.width]
+                    edge_index[1] += [i-self.width, i-1, i+self.width, i, i, i]
+            else:
+                edge_index[0] += [i, i, i, i, i-1, i-self.width, i+1, i+self.width]
+                edge_index[1] += [i-1, i-self.width, i+1, i+self.width, i, i, i, i]
+        edge_index[0] += [i for i in range(self.width * self.height)]
+        edge_index[1] += [self.width * self.height for _ in range(self.width*self.height)]
+        edge_index = torch.LongTensor(edge_index)
+        data = Data(x=x, edge_index=edge_index)
+        return data
+
     def move_to_location(self, move):
         """
         3*3 board's moves like:
@@ -55,24 +93,24 @@ class Board(object):
 
     def current_state(self):
         """return the board state from the perspective of the current player.
-        state shape: 4*width*height
+        cnn state shape: 4*width*height
         """
-
-        square_state = np.zeros((4, self.width, self.height))
+        cnn_state = np.zeros((4, self.width, self.height))
         if self.states:
             moves, players = np.array(list(zip(*self.states.items())))
             move_curr = moves[players == self.current_player]
             move_oppo = moves[players != self.current_player]
-            square_state[0][move_curr // self.width,
+            cnn_state[0][move_curr // self.width,
                             move_curr % self.height] = 1.0
-            square_state[1][move_oppo // self.width,
+            cnn_state[1][move_oppo // self.width,
                             move_oppo % self.height] = 1.0
             # indicate the last move location
-            square_state[2][self.last_move // self.width,
+            cnn_state[2][self.last_move // self.width,
                             self.last_move % self.height] = 1.0
         if len(self.states) % 2 == 0:
-            square_state[3][:, :] = 1.0  # indicate the colour to play
-        return square_state[:, ::-1, :]
+            cnn_state[3][:, :] = 1.0  # indicate the colour to play
+
+        return cnn_state
 
     def do_move(self, move):
         self.states[move] = self.current_player
@@ -199,7 +237,8 @@ class Game(object):
                                                  temp=temp,
                                                  return_prob=1)
             # store the data
-            states.append(self.board.current_state())
+            current_state = self.board.current_state()
+            states.append(current_state)
             mcts_probs.append(move_probs)
             current_players.append(self.board.current_player)
             # perform a move
