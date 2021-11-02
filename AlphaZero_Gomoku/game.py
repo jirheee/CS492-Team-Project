@@ -58,15 +58,18 @@ class Board(object):
             move_curr = moves[players == self.current_player]
             move_oppo = moves[players != self.current_player]
             square_state[0][move_curr // self.width,
-                            move_curr % self.height] = 1.0
+                            move_curr % self.width] = 1.0
             square_state[1][move_oppo // self.width,
-                            move_oppo % self.height] = 1.0
+                            move_oppo % self.width] = 1.0
             # indicate the last move location
             square_state[2][self.last_move // self.width,
-                            self.last_move % self.height] = 1.0
+                            self.last_move % self.width] = 1.0
         if len(self.states) % 2 == 0:
             square_state[3][:, :] = 1.0  # indicate the colour to play
-        return square_state[:, ::-1, :]
+        # Un-reversed in order to easily match move index and q_value index
+        # argmax(q_val_T) -> move -> mark on state_T is straight foraward now
+        # This change might break some features
+        return square_state
 
     def do_move(self, move):
         self.states[move] = self.current_player
@@ -126,10 +129,10 @@ class Board(object):
 class Game(object):
     """game server"""
 
-    def __init__(self, board, **kwargs):
+    def __init__(self, board:Board, **kwargs):
         self.board = board
 
-    def graphic(self, board, player1, player2):
+    def graphic(self, board:Board, player1, player2):
         """Draw the board and show game info"""
         width = board.width
         height = board.height
@@ -140,7 +143,7 @@ class Game(object):
         for x in range(width):
             print("{0:8}".format(x), end='')
         print('\r\n')
-        for i in range(height - 1, -1, -1):
+        for i in range(height):
             print("{0:4d}".format(i), end='')
             for j in range(width):
                 loc = i * width + j
@@ -151,7 +154,7 @@ class Game(object):
                     print('O'.center(8), end='')
                 else:
                     print('_'.center(8), end='')
-            print('\r\n\r\n')
+            print('\r\n')
 
     def start_play(self, player1, player2, start_player=0, is_shown=1):
         """start a game between two players"""
@@ -171,6 +174,12 @@ class Game(object):
             move = player_in_turn.get_action(self.board)
             self.board.do_move(move)
             if is_shown:
+                # Display how random the policy is (eps): 0 is greedy, 1 is pure random
+                print(move//self.board.width, move%self.board.width)
+                try:
+                    print("eps:", player_in_turn.eps)
+                except AttributeError:
+                    print("Player ", current_player, "does not have eps")
                 self.graphic(self.board, player1.player, player2.player)
             end, winner = self.board.game_end()
             if end:
