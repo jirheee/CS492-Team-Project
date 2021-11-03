@@ -44,36 +44,36 @@ class Human(object):
 
 
 def run(data):
-    n = 4
-    width, height = 6, 6
-    model_file = './model/best_policy_gnn.model'
     f = open(data, encoding='utf-8')
     data = json.loads(f.read())
 
     try:
-        board = Board(width=width, height=height, n_in_row=n)
+        width = data["board"]["board_width"]
+        height = data["board"]["board_height"]
+        n_in_row = data["board"]["n_in_row"]
+        board = Board(width=width, height=height, n_in_row=n_in_row)
         game = Game(board)
 
         # ############### human VS AI ###################
-        # load the trained policy_value_net in either Theano/Lasagne, PyTorch or TensorFlow
-        best_policy = PolicyValueNet(width, height, data["nn_information"], model_file=model_file)
-        mcts_player = MCTSPlayer(best_policy.policy_value_fn,
+        player1_data = data["player1"]
+        player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"])
+        player1 = MCTSPlayer(player1_policy.policy_value_fn,
                                  c_puct=5,
                                  n_playout=400)  # set larger n_playout for better performance
 
-        # uncomment the following line to play with pure MCTS (it's much weaker even with a larger n_playout)
-        # mcts_player = MCTS_Pure(c_puct=5, n_playout=1000)
-
-        # human player, input your move in the format: 2,3
-        best_policy_ = PolicyValueNet(width, height, data["nn_information"], model_file=model_file)
+        player2_data = data["player2"]
+        player2_policy = PolicyValueNet(width, height, player2_data["nn_information"], model_file=player2_data["model_path"])
+        player2 = MCTSPlayer(player2_policy.policy_value_fn,
+                                 c_puct=5,
+                                 n_playout=400)
         human =  Human()
 
         # set start_player=0 for human first
-        game.start_play(human, mcts_player, start_player=1, is_shown=1)
+        game.start_play(player1, player2, start_player=1, is_shown=1)
     except KeyboardInterrupt:
         print('\n\rquit')
 
 
 if __name__ == '__main__':
-    data = './data/battle_example_gnn.json'
+    data = './data/battle_example.json'
     run(data)

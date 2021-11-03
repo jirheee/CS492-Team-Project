@@ -2,11 +2,9 @@
 """
 @author: Junxiao Song
 """
+import random
 
 import numpy as np
-
-import torch
-from torch_geometric.data import Data
 
 
 class Board(object):
@@ -32,42 +30,6 @@ class Board(object):
         self.availables = list(range(self.width * self.height))
         self.states = {}
         self.last_move = -1
-
-    def get_gnn_state(self, x):
-        x = np.array(x).reshape(4, self.width*self.height).T
-        global_x = np.zeros((1, 4))
-        x = np.concatenate((x, global_x), axis=0)
-
-        edge_index = [[], []]
-        for i in range(self.width * self.height):
-            if i % self.width == 0:
-                if i // self.height == 0:
-                    edge_index[0] += [i, i, i+1, i+self.width]
-                    edge_index[1] += [i+1, i+self.width, i, i]
-                elif i // self.height == self.height - 1:
-                    edge_index[0] += [i, i, i+1, i-self.width]
-                    edge_index[1] += [i+1, i-self.width, i, i]
-                else:
-                    edge_index[0] += [i, i, i, i-self.width, i+1, i+self.width]
-                    edge_index[1] += [i-self.width, i+1, i+self.width, i, i, i]
-            elif i % self.width == self.width-1:
-                if i // self.height == 0:
-                    edge_index[0] += [i, i, i-1, i+self.width]
-                    edge_index[1] += [i-1, i+self.width, i, i]
-                elif i // self.height == self.height - 1:
-                    edge_index[0] += [i, i, i-1, i-self.width]
-                    edge_index[1] += [i-1, i-self.width, i, i]
-                else:
-                    edge_index[0] += [i, i, i, i-self.width, i-1, i+self.width]
-                    edge_index[1] += [i-self.width, i-1, i+self.width, i, i, i]
-            else:
-                edge_index[0] += [i, i, i, i, i-1, i-self.width, i+1, i+self.width]
-                edge_index[1] += [i-1, i-self.width, i+1, i+self.width, i, i, i, i]
-        edge_index[0] += [i for i in range(self.width * self.height)]
-        edge_index[1] += [self.width * self.height for _ in range(self.width*self.height)]
-        edge_index = torch.LongTensor(edge_index)
-        data = Data(x=x, edge_index=edge_index)
-        return data
 
     def move_to_location(self, move):
         """
@@ -209,6 +171,12 @@ class Game(object):
         players = {p1: player1, p2: player2}
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
+        # First Move: Random
+        first_move = random.randint(0, self.board.width * self.board.height-1)
+        print(first_move)
+        self.board.do_move(first_move)
+        if is_shown:
+                self.graphic(self.board, player1.player, player2.player)
         while True:
             current_player = self.board.get_current_player()
             player_in_turn = players[current_player]

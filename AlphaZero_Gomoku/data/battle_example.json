@@ -1,0 +1,70 @@
+{
+    "board": {
+        "board_width": 6,
+        "board_height": 6,
+        "n_in_row": 4
+    },
+    "player1": {
+        "model_path": "./model/best_policy_cnn.model",
+        "nn_information":{
+            "nn_type": "CNN",
+            "n_layers": 4,
+            "layer_0": {
+                "layer_name": "Conv",
+                "channels": 32,
+                "kernel_size": 3,
+                "stride": 1,
+                "padding": 1,
+                "bias": "False"
+            },
+            "layer_1": {
+                "layer_name": "Conv",
+                "channels": 64,
+                "kernel_size": 3,
+                "stride": 1,
+                "padding": 1,
+                "bias": "False"
+            },
+            "layer_2": {
+                "layer_name": "Conv",
+                "channels": 128,
+                "kernel_size": 3,
+                "stride": 1,
+                "padding": 1,
+                "bias": "False"
+            },
+            "layer_3": {
+                "layer_name": "Conv",
+                "channels": 2,
+                "kernel_size": 1,
+                "stride": 1,
+                "padding": 0,
+                "bias": "False"
+            },
+            "activ_func": "ReLU"
+        }
+    },
+    "player2": {
+        "model_path": "./model/best_policy_gnn.model",
+        "nn_information":{
+            "nn_type": "GNN",
+            "n_layers": 3,
+            "layer_0": {
+                "layer_name": "SGConv",
+                "channels": 32,
+                "bias": "False"
+            },
+            "layer_1": {
+                "layer_name": "SGConv",
+                "channels": 64,
+                "bias": "False"
+            },
+            "layer_2": {
+                "layer_name": "SGConv",
+                "channels": 64,
+                "bias": "False"
+            },
+            "activ_func": "ReLU"
+        }
+    }
+}
