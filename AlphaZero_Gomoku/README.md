@@ -1,3 +1,3 @@
 ## GNN Procedure Explanation
 
-![](gnn_explained.png)
+![fff](gnn_explained.PNG)
