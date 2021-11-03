@@ -172,8 +172,7 @@ class Game(object):
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
         # First Move: Random
-        first_move = random.randint(0, self.board.width * self.board.height-1)
-        print(first_move)
+        first_move = random.sample([14, 15, 20, 21], 1)[0]
         self.board.do_move(first_move)
         if is_shown:
                 self.graphic(self.board, player1.player, player2.player)

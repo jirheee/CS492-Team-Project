@@ -64,7 +64,7 @@ class NeuralNet(nn.Module):
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GCNConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels 
+                    prev_channels = channels
                 elif layer_information["layer_name"] == "SGConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
@@ -72,7 +72,7 @@ class NeuralNet(nn.Module):
                     prev_channels = channels      
                 else:
                     NotImplementedError()
-            self.final_input_size = channels
+            self.final_input_size = channels * self.board_width * self.board_height
         else:
             NotImplementedError()
 
@@ -104,7 +104,6 @@ class NeuralNet(nn.Module):
             for layer in self.layers:
                 x = layer(x, edge_index)
                 x = self.activ_func(x)
-            x = global_mean_pool(x, batch)
 
         x_act = x.view(-1, self.final_input_size)
         x_act = F.relu(self.act_fc1(x_act))

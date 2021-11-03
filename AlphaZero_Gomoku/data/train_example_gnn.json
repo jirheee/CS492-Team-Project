@@ -15,17 +15,17 @@
         "n_layers": 3,
         "layer_0": {
             "layer_name": "SGConv",
-            "channels": 32,
+            "channels": 6,
             "bias": "False"
         },
         "layer_1": {
             "layer_name": "SGConv",
-            "channels": 64,
+            "channels": 6,
             "bias": "False"
         },
         "layer_2": {
             "layer_name": "SGConv",
-            "channels": 64,
+            "channels": 6,
             "bias": "False"
         },
         "activ_func": "ReLU"

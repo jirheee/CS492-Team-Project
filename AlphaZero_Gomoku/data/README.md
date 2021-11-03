@@ -17,13 +17,17 @@
 - nn_type: [`CNN`, `GNN`]: type of Neural Architecture
 - n_layers: `int`, Number of layers
 - layer_0, ..., layer_n: Information for layers
+
     if layer_name == 'Conv':
         channels, kernel_size, stride, padding, bias information required(type: `int` except bias term: `str`)
+
     if layer_name == 'BatchNorm':
         no additional information required
-    if layer_name == 'GCNConv': ![논문 링크](https://arxiv.org/abs/1609.02907)
+
+    if layer_name == 'GCNConv': [논문 링크](https://arxiv.org/abs/1609.02907)
         channels, bias information required(type: `int` except bias term: `str`)
-    if layer_name == 'SGConv': ![논문 링크](https://arxiv.org/abs/1902.07153)
+
+    if layer_name == 'SGConv': [논문 링크](https://arxiv.org/abs/1902.07153)
         channels, bias information required(type: `int` except bias term: `str`)
 - activ_func: [`ReLU`, `Sigmoid`, `Tanh`, `LeakyReLU`], Activation Function 
 
