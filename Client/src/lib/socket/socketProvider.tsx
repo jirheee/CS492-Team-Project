@@ -35,6 +35,8 @@ function SocketProvider({
     });
 
     newSocket.on('disconnect', () => {
+      console.log('socket disconnected');
+      newSocket.removeAllListeners();
       setConnected(false);
     });
 
@@ -44,9 +46,10 @@ function SocketProvider({
 
     return () => {
       setSocket(null);
+      console.log('socket disconnect');
       newSocket.disconnect();
     };
-  }, []);
+  }, [url, options]);
 
   const getSocket = () => socket;
   const getConnected = () => connected;
