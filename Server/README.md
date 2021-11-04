@@ -1,4 +1,4 @@
-# CS492-Team-Project Client
+# CS492-Team-Project Server  
 
 If you are not familiar with Docker, [this video](https://www.youtube.com/watch?v=3c-iBn73dDE&t=7081s) was quite helpful for me understanding the files in this repository.  
 
