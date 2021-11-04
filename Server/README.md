@@ -16,17 +16,17 @@ If you are not familiar with Docker, [this video](https://www.youtube.com/watch?
         ```
 3. Finally, we can run the server on Docker.  
 ***IMPORTANT*** [Check the End-Of-Line (EOL) format of your `entrypoint.sh` first](https://github.com/jirheee/CS492-Team-Project/issues/8#issuecomment-960514476).  It should be in "**LF**" format.  
-**This should be checked before running the command.**  
+**^^This should be checked before running the command.**  
     - To run the server, open your PowerShell (Windows) or shell (others) and run  
         ```
         docker-compose up --build
         ```
-    in the `Server/` directory.
+        in the `Server/` directory.
     - If something goes wrong in the middle, you should run
         ```
         docker-compose down -v --rmi local
         ```
-        to cleanup the mess.  
+        to cleanup the mess. You can do this after `Ctrl+C` or in a separate instance of terminal.  
     
 If you see 
 ```
@@ -44,12 +44,12 @@ at the end, or
 ```
 cs492i-api-server  | standard_init_linux.go:228: exec user process caused: no such file or directory cs492i-api-server exited with code 0
 ```
-in the middle, your `entrypoint.sh` is likely the culprit.
+somewhere in the middle, your `entrypoint.sh` is likely the culprit.
 
 ## After understanding more about Docker  
 
 ### Consistent Database (Don't delete the volume!)  
-To retain database after clsing and cleaning up the server, run
+To retain database after closing and cleaning up the server, run
 ```
 docker-compose down
 ```
@@ -58,7 +58,7 @@ You may also want to run the server with
 ```
 docker-compose up
 ```
-without the `--build`, since it will create new images everytime.  
+without the `--build`, since `--build` option creates a new image everytime.  
   
 ## To interact with the server container
 If you want to use the alpine linux of the server,  
