@@ -4,6 +4,7 @@ import { Server as SocketIOServer } from 'socket.io';
 
 import config from './config';
 import { expressLoader, ioLoader, ormLoader } from './loader';
+import PythonSpawner from './ml/pythonSpawner';
 
 class Server {
   public static async start(): Promise<void> {
@@ -20,6 +21,9 @@ class Server {
       // eslint-disable-next-line no-console
       console.log(`Server running on port ${config.HTTP_PORT}`);
     });
+
+    const process = new PythonSpawner('./dummy.py');
+    await process.run();
   }
 }
 
