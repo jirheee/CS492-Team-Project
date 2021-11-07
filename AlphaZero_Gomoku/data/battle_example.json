@@ -45,7 +45,7 @@
         }
     },
     "player2": {
-        "model_path": "./model/best_policy.model",
+        "model_path": "./model/best_policy_gnn.model",
         "nn_information":{
             "nn_type": "GNN",
             "n_layers": 3,
