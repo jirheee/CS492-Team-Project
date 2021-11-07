@@ -251,3 +251,7 @@ class PolicyValueNet():
         """ save model params to file """
         net_params = self.get_policy_param()  # get model params
         torch.save(net_params, model_file)
+
+    def num_params(self):
+        # Number of Trainable Parameters
+        return sum(p.numel() for p in self.policy_value_net.parameters() if p.requires_grad)
