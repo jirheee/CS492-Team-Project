@@ -65,11 +65,6 @@ class NeuralNet(nn.Module):
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GCNConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
-                elif layer_information["layer_name"] == "ChebConv":
-                    channels = layer_information["channels"]
-                    bias = True if layer_information['bias'] == "True" else False
-                    self.layers.append(ChebConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels
                 elif layer_information["layer_name"] == "SAGEConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
