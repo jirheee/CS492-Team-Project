@@ -12,7 +12,6 @@
     },
     "nn_information":{
         "nn_type": "CNN",
-        "n_layers": 4,
         "layers": [
             {
                 "layer_name": "Conv",

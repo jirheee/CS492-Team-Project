@@ -12,7 +12,6 @@
     },
     "nn_information":{
         "nn_type": "GNN",
-        "n_layers": 3,
         "layers": [
             {
                 "layer_name": "SGConv",

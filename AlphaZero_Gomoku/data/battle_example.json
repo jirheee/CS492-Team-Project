@@ -8,7 +8,6 @@
         "model_path": "./model/cnn/epoch_100.model",
         "nn_information":{
             "nn_type": "CNN",
-            "n_layers": 4,
             "layers": [
                 {
                     "layer_name": "Conv",
@@ -50,7 +49,6 @@
         "model_path": "./model/gnn/epoch_100.model",
         "nn_information":{
             "nn_type": "GNN",
-            "n_layers": 3,
             "layers": [
                 {
                     "layer_name": "SGConv",
