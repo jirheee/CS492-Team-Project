@@ -15,8 +15,7 @@
 
 ### 3. NN_Information - Neural Network Architecture
 - nn_type: [`CNN`, `GNN`]: type of Neural Architecture
-- n_layers: `int`, Number of layers
-- layer_0, ..., layer_n: Information for layers
+- layers: Array of layers
 
     if layer_name == 'Conv':
         channels, kernel_size, stride, padding, bias information required(type: `int` except bias term: `str`)
@@ -25,10 +24,20 @@
         no additional information required
 
     if layer_name == 'GCNConv': [논문 링크](https://arxiv.org/abs/1609.02907)
-        channels, bias information required(type: `int` except bias term: `str`)
+        channels, bias information required(channels: `int` bias: `str`)
 
     if layer_name == 'SGConv': [논문 링크](https://arxiv.org/abs/1902.07153)
-        channels, bias information required(type: `int` except bias term: `str`)
+        channels, bias information required(channels: `int` bias: `str`)
+        
+    if layer_name == 'GATConv': [논문_링크](https://arxiv.org/abs/1710.10903)
+        channels, bias information required(channels: `int` bias: `str`) 
+        
+    if layer_name == 'GINConv': [논문_링크](https://arxiv.org/abs/1810.00826)
+        channels, bias information required(channels: `int` bias: `str`)  
+        
+    if layer_name == 'SAGEConv': [논문_링크](https://arxiv.org/abs/1706.02216)
+        channels, bias information required(channels: `int` bias: `str`) 
+       
 - activ_func: [`ReLU`, `Sigmoid`, `Tanh`, `LeakyReLU`], Activation Function 
 
 -------
