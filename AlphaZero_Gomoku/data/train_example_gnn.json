@@ -13,21 +13,23 @@
     "nn_information":{
         "nn_type": "GNN",
         "n_layers": 3,
-        "layer_0": {
-            "layer_name": "SGConv",
-            "channels": 6,
-            "bias": "False"
-        },
-        "layer_1": {
-            "layer_name": "SGConv",
-            "channels": 6,
-            "bias": "False"
-        },
-        "layer_2": {
-            "layer_name": "SGConv",
-            "channels": 6,
-            "bias": "False"
-        },
+        "layers": [
+            {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            }
+        ],
         "activ_func": "ReLU"
     }
 }

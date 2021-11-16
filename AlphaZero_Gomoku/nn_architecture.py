@@ -35,8 +35,8 @@ class NeuralNet(nn.Module):
             prev_width = self.board_width
             prev_height = self.board_height
             input_sizes = [(prev_channels, prev_width, prev_height)]
-            for i in range(nn_information['n_layers']):
-                layer_information = nn_information.get(f"layer_{i}")
+            for layer_information in nn_information['layers']:
+                # layer_information = nn_information.get(f"layer_{i}")
                 if layer_information["layer_name"] == "Conv":
                     channels = layer_information["channels"]
                     kernel_size = layer_information["kernel_size"]
@@ -58,8 +58,8 @@ class NeuralNet(nn.Module):
             self.final_input_size = calculate_input_size(input_sizes[-1])
         elif self.nn_type == "GNN":
             prev_channels = 4
-            for i in range(nn_information['n_layers']):
-                layer_information = nn_information.get(f"layer_{i}")
+            for layer_information in nn_information['layers']:
+                # layer_information = nn_information.get(f"layer_{i}")
                 if layer_information["layer_name"] == "GCNConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
