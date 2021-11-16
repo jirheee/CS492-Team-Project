@@ -1,17 +1,14 @@
-import { ColorModeScript } from '@chakra-ui/react';
+// import { ColorModeScript } from '@chakra-ui/react';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { App } from './App';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
-import { SocketProvider } from '../src/lib/socket';
+// import { SocketProvider } from '../src/lib/socket';
 
 ReactDOM.render(
   <React.StrictMode>
-    <SocketProvider url="localhost:5000">
-      <ColorModeScript />
-      <App />
-    </SocketProvider>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );
