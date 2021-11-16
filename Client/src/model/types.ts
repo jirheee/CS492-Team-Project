@@ -15,7 +15,10 @@ export enum LayerType {
   Conv = 'Conv',
   BatchNorm = 'BatchNorm',
   GCNConv = 'GCNConv',
-  SGConv = 'SGConv'
+  SGConv = 'SGConv',
+  GATConv = 'GATConv',
+  GINConv = 'GINConv',
+  SAGEConv = 'SAGEConv'
 }
 
 export enum ActivationFunction {
@@ -37,9 +40,15 @@ export enum BiasInfo {
 
 export interface Layer {
   layer_name: LayerType;
+}
+
+export interface GraphConvLayer extends Layer {
   channels: number;
+  bias: BiasInfo;
+}
+
+export interface ConvLayer extends GraphConvLayer {
   kernel_size: number;
   stride: number;
   padding: number;
-  bias: BiasInfo;
 }
