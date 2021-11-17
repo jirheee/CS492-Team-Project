@@ -1,0 +1,1 @@
+{"nn_information":{"nn_type":"CNN","layers":[{"layer_name":"Conv","channels":32,"kernel_size":3,"stride":1,"padding":1,"bias":"False"},{"layer_name":"Conv","channels":64,"kernel_size":3,"stride":1,"padding":1,"bias":"False"}],"activ_func":"ReLU"}}
