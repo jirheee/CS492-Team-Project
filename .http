@@ -1,0 +1,50 @@
+POST http://localhost:5000/api/agent/create HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "bob",
+  "model": {
+    "board": {
+      "board_width": 6,
+      "board_height": 6,
+      "n_in_row": 6
+    },
+    "nn_type": "CNN",
+    "layers": [
+      {
+        "layer_name": "Conv",
+        "channels": 32,
+        "kernel_size": 3,
+        "stride": 1,
+        "padding": 1,
+        "bias": "False"
+      },
+      {
+        "layer_name": "Conv",
+        "channels": 64,
+        "kernel_size": 3,
+        "stride": 1,
+        "padding": 1,
+        "bias": "False"
+      }
+    ],
+    "activ_func": "ReLU"
+  }
+}
+
+###
+POST http://localhost:5000/api/agent/train HTTP/1.1
+Content-Type: application/json
+
+{
+  "agentUUID": "1aaa41fa-526e-47c6-916c-07906127df3c",
+  "hyperparameters": {
+        "lr": 0.001,
+        "buffer_size": 5000,
+        "batch_size": 256,
+        "epochs": 100
+    }
+}
+
+###
+GET http://localhost:5000/api/agent/1aaa41fa-526e-47c6-916c-07906127df3c HTTP/1.1
