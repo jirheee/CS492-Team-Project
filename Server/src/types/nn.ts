@@ -1,3 +1,5 @@
+export type AgentUUID = string;
+
 export interface Board {
   board_width: number;
   board_height: number;
@@ -19,7 +21,7 @@ export interface Model {
   board: Board;
   nn_type: 'CNN' | 'GNN';
   layers: Required<Layer>[];
-  active_func: 'ReLU' | 'Sigmoid' | 'Tanh' | 'LeakyReLU';
+  activ_func: 'ReLU' | 'Sigmoid' | 'Tanh' | 'LeakyReLU';
 }
 
 export interface HyperParameters {

@@ -9,7 +9,7 @@ import {
 @Entity()
 export default class Agent extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  public uuid: number;
+  public uuid: string;
 
   @CreateDateColumn()
   public createdAt: Date;
