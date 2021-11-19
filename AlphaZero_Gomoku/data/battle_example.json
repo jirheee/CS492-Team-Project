@@ -52,17 +52,22 @@
             "layers": [
                 {
                     "layer_name": "SGConv",
-                    "channels": 6,
+                    "channels": 64,
                     "bias": "False"
                 },
                 {
                     "layer_name": "SGConv",
-                    "channels": 6,
+                    "channels": 64,
                     "bias": "False"
                 },
                 {
                     "layer_name": "SGConv",
-                    "channels": 6,
+                    "channels": 64,
+                    "bias": "False"
+                },
+                {
+                    "layer_name": "SGConv",
+                    "channels": 64,
                     "bias": "False"
                 }
             ],

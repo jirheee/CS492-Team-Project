@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from torch_geometric.nn import GCNConv, SGConv, global_mean_pool
+from torch_geometric.nn import GCNConv, SGConv, SAGEConv, GATConv, GINConv, global_mean_pool, global_sort_pool, GlobalAttention
 from torch_geometric.data import Data, Batch
 from torch_geometric.loader import DataLoader
 
@@ -58,36 +58,40 @@ class NeuralNet(nn.Module):
             self.final_input_size = calculate_input_size(input_sizes[-1])
         elif self.nn_type == "GNN":
             prev_channels = 4
+            input_sizes = [prev_channels]
             for layer_information in nn_information['layers']:
                 # layer_information = nn_information.get(f"layer_{i}")
                 if layer_information["layer_name"] == "GCNConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GCNConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels
                 elif layer_information["layer_name"] == "SAGEConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(SAGEConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels
                 elif layer_information["layer_name"] == "GATConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GATConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels
                 elif layer_information["layer_name"] == "GINConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GINConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels
                 elif layer_information["layer_name"] == "SGConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
-                    self.layers.append(SGConv(prev_channels, channels, bias=bias))
-                    prev_channels = channels      
+                    self.layers.append(SGConv(prev_channels, channels, bias=bias))   
                 else:
                     NotImplementedError()
-            self.final_input_size = channels * self.board_width * self.board_height
+                prev_channels = channels
+                input_sizes.append(channels)
+            # self.final_input_size = sum(input_sizes)
+            self.final_input_size = channels
+            self.global_attention = GlobalAttention(gate_nn=nn.Sequential(
+                                                        nn.Linear(self.final_input_size, 64), 
+                                                        nn.ReLU(),
+                                                        nn.Linear(64, 1)
+                                                    ))
         else:
             NotImplementedError()
 
@@ -102,13 +106,14 @@ class NeuralNet(nn.Module):
         else:
             NotImplementedError()
         
-        # action policy layers
-        self.act_fc1 = nn.Linear(self.final_input_size, 64)
-        self.act_fc2 = nn.Linear(64, self.board_width * self.board_height)        
+        self.fc1 = nn.Linear(self.final_input_size, 64)
+        self.fc2 = nn.Linear(64, 64)
         
-        # state value layers
-        self.val_fc1 = nn.Linear(self.final_input_size, 64)
-        self.val_fc2 = nn.Linear(64, 1)
+        # action policy layer
+        self.act_fc = nn.Linear(64, self.board_width * self.board_height)        
+        
+        # state value layer
+        self.val_fc = nn.Linear(64, 1)
 
     def forward(self, x, edge_index=None, batch=None):
         if self.nn_type == "CNN":
@@ -116,17 +121,21 @@ class NeuralNet(nn.Module):
                 x = layer(x)
                 x = self.activ_func(x)
         else:
+            # prev_x = [x]
             for layer in self.layers:
                 x = layer(x, edge_index)
                 x = self.activ_func(x)
+                # prev_x.append(x)
+            # x = torch.cat(prev_x, dim=1)
+            x = self.global_attention(x, batch)
 
-        x_act = x.view(-1, self.final_input_size)
-        x_act = F.relu(self.act_fc1(x_act))
-        x_act = F.log_softmax(self.act_fc2(x_act), dim=-1)
-
-        x_val = x.view(-1, self.final_input_size)
-        x_val = F.relu(self.val_fc1(x_val))
-        x_val = torch.tanh(self.val_fc2(x_val))
+        x = x.view(-1, self.final_input_size)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        
+        x_act = F.log_softmax(self.act_fc(x), dim=-1)
+        x_val = torch.tanh(self.val_fc(x))
+        
         return x_act, x_val
 
 
@@ -181,7 +190,7 @@ class PolicyValueNet():
             else:
                 edge_index[0] += [i, i, i, i, i-1, i-self.board_width, i+1, i+self.board_width]
                 edge_index[1] += [i-1, i-self.board_width, i+1, i+self.board_width, i, i, i, i]
-        edge_index = torch.LongTensor(edge_index)
+        edge_index = torch.LongTensor(edge_index).to(self.device)
         return edge_index
 
     def policy_value(self, state_batch):
@@ -218,7 +227,7 @@ class PolicyValueNet():
 
             log_act_probs, value = self.policy_value_net(
                     Variable(torch.from_numpy(current_state)).to(self.device).float(), 
-                    self.edge_index, torch.LongTensor([0 for _ in range(self.board_width*self.board_height)]))
+                    self.edge_index, torch.LongTensor([0 for _ in range(self.board_width*self.board_height)]).to(self.device))
         
         act_probs = np.exp(log_act_probs.data.cpu().numpy().flatten())
         act_probs = zip(legal_positions, act_probs[legal_positions])
@@ -236,6 +245,7 @@ class PolicyValueNet():
             state = next(iter(state_loader))
             log_act_probs, value = self.policy_value_net(state.x, state.edge_index, state.batch)
 
+        mcts_probs = np.array(mcts_probs)
         mcts_probs = Variable(torch.FloatTensor(mcts_probs).to(self.device))
         winner_batch = Variable(torch.FloatTensor(winner_batch).to(self.device))
 
