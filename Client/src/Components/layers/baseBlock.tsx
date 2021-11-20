@@ -1,40 +1,53 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Flex, Text, CloseButton } from '@chakra-ui/react';
 import { LayerType } from '../../model/types';
 import { getBlockColor } from '../../lib/util';
+import { ReactElement } from 'react-router/node_modules/@types/react';
 
-interface BlockProps {
-  children?: React.ReactElement[];
+export interface BlockProps<T> {
   layerType: LayerType;
-  isEditable: boolean;
+  popover?: ReactElement;
+  onClick?: () => void;
+  onClose?: () => void;
+  onModify?: (newLayer: T) => () => void;
 }
 
-const BaseBlock = ({ children, layerType, isEditable }: BlockProps) => {
-  const [hover, setHover] = useState(false);
-
+const BaseBlock = <T extends unknown>({
+  children,
+  layerType,
+  popover,
+  onClick,
+  onClose
+}: React.PropsWithChildren<BlockProps<T>>) => {
   return (
     <Flex
       w={100}
-      h={150}
+      h={160}
       backgroundColor={getBlockColor(layerType)}
       borderWidth="1px"
-      alignContent="center"
+      position="relative"
+      borderRadius="8px"
       justifyContent="center"
       flexDir="column"
-      textAlign="center"
-      position="relative"
-      onMouseEnter={() => {
-        isEditable && setHover(true);
-      }}
-      onMouseLeave={() => {
-        isEditable && setHover(false);
-      }}
+      onClick={onClick}
+      _hover={onClick ? { cursor: 'pointer' } : {}}
     >
-      {hover && isEditable && (
-        <CloseButton position="absolute" right={0} top={0} />
+      {!onClick && (
+        <Flex
+          w="full"
+          justifyContent="space-around"
+          position="absolute"
+          right={0}
+          top={0}
+        >
+          {popover}
+          <CloseButton onClick={onClose} marginLeft="auto" />
+        </Flex>
       )}
-      <Text fontWeight="bold">{layerType}</Text>
-      {children}
+      <Flex flexDir="column" textAlign="center" justifyContent="center">
+        <Text fontWeight="bold">{layerType}</Text>
+        {children}
+      </Flex>
     </Flex>
   );
 };

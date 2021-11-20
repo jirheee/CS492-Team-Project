@@ -1,8 +1,19 @@
-import { LayerType } from '../../model/types';
-import BaseBlock from './baseBlock';
+import { Layer, LayerType } from '../../model/types';
+import BaseBlock, { BlockProps } from './baseBlock';
 
-const BatchNorm = ({ isEditable }) => {
-  return <BaseBlock layerType={LayerType.BatchNorm} isEditable={isEditable} />;
+const BatchNorm = ({
+  onClick,
+  onClose,
+  onModify
+}: Omit<BlockProps<Layer>, 'layerType'>) => {
+  return (
+    <BaseBlock<Layer>
+      layerType={LayerType.BatchNorm}
+      onClick={onClick}
+      onClose={onClose}
+      onModify={onModify}
+    />
+  );
 };
 
 export default BatchNorm;

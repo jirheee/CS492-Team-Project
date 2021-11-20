@@ -1,26 +1,28 @@
-import { Input, Text } from '@chakra-ui/react';
-import { useState } from 'react';
-import BaseBlock from './baseBlock';
-import { BiasInfo, LayerType } from '../../model/types';
+import { Text } from '@chakra-ui/react';
+import BaseBlock, { BlockProps } from './baseBlock';
+import { GraphConvLayer } from '../../model/types';
+import BlockConfigurePopover from './blockConfigurePopover';
 
-const GraphConv = ({ layerType, isEditable }) => {
-  const [channels, setChannels] = useState(1);
-  const [bias, setBias] = useState(BiasInfo.True);
+const GraphConv = ({
+  layerType,
+  layerProps,
+  onClick,
+  onClose,
+  onModify
+}: BlockProps<GraphConvLayer> & { layerProps: GraphConvLayer }) => {
+  const { channels, bias } = layerProps;
   return (
-    <BaseBlock layerType={layerType} isEditable={isEditable}>
+    <BaseBlock<GraphConvLayer>
+      layerType={layerType}
+      popover={
+        <BlockConfigurePopover layerProps={layerProps} onModify={onModify} />
+      }
+      onClick={onClick}
+      onClose={onClose}
+      onModify={onModify}
+    >
       <Text fontSize="12px">{`Channels: ${channels}`}</Text>
-      <Text
-        fontSize="12px"
-        onClick={() => {
-          isEditable &&
-            setBias(b =>
-              b === BiasInfo.True ? BiasInfo.False : BiasInfo.True
-            );
-        }}
-        _hover={
-          isEditable ? { cursor: 'pointer', backgroundColor: 'gray.50' } : {}
-        }
-      >{`Bias: ${bias}`}</Text>
+      <Text fontSize="12px">{`Bias: ${bias}`}</Text>
     </BaseBlock>
   );
 };
