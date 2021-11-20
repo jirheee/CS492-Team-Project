@@ -232,12 +232,12 @@ const NNBoard = () => {
           : getGnnAvailableLayerTypes().map(layerProps =>
               createLayerElement(
                 layerProps.layer_name,
-                layerProps as ConvLayer,
+                layerProps as GraphConvLayer,
                 layerProps.layer_name,
                 () => {
                   setLayers(layerArr => [
                     ...layerArr,
-                    createLayer(layerProps.layer_name) as ConvLayer
+                    createLayer(layerProps.layer_name) as GraphConvLayer
                   ]);
                 }
               )
