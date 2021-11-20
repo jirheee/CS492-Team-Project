@@ -29,7 +29,6 @@ import Request from '../lib/api/request';
 
 const createLayerElement = (
   layerType: LayerType,
-  isEditable: boolean,
   layerProps: ConvLayer | GraphConvLayer | Layer,
   key?: any,
   onClick?: () => void,
@@ -140,7 +139,6 @@ const NNBoard = () => {
           {layers.map((layerProps, i) =>
             createLayerElement(
               layerProps.layer_name,
-              true,
               layerProps,
               i,
               undefined,
@@ -221,7 +219,6 @@ const NNBoard = () => {
           ? getCnnAvailableLayerTypes().map(layerProps =>
               createLayerElement(
                 layerProps.layer_name,
-                false,
                 layerProps as ConvLayer,
                 layerProps.layer_name,
                 () => {
@@ -235,7 +232,6 @@ const NNBoard = () => {
           : getGnnAvailableLayerTypes().map(layerProps =>
               createLayerElement(
                 layerProps.layer_name,
-                false,
                 layerProps as ConvLayer,
                 layerProps.layer_name,
                 () => {
