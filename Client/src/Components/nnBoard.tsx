@@ -78,7 +78,6 @@ const NNBoard = () => {
   const [isInvalidNinRow, setInvalidNinRow] = useState<boolean>(false);
 
   const handleSubmit = async event => {
-    console.log(event);
     event.preventDefault();
     const { target } = event;
     console.log(
@@ -90,7 +89,7 @@ const NNBoard = () => {
         },
         nn_type: target[0].value,
         layers,
-        activ_func: 'ReLU'
+        activ_func: target[3].value
       })
     );
     // Request.post('/create/agent', JSON.stringify(layers));
