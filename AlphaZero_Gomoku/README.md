@@ -20,6 +20,6 @@
 2. BatchNorm
     - input: (W_in, H_in, C_in)
     - output: (W_in, H_in, C_in)
-3. SGConv(num_channels)
+3. SGConv(num_channels) 및 다른 GNN Layer(GCNConv, GATConv, SAGEConv, GINConv)
     - input: (number of nodes, C_in)
     - output: (number of nodes, num_channels)
