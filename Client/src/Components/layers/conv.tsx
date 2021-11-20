@@ -3,7 +3,11 @@ import { useState } from 'react';
 import BaseBlock from './baseBlock';
 import { BiasInfo, ConvLayer, LayerType } from '../../model/types';
 
+<<<<<<< HEAD
 const Conv = ({ isEditable }) => {
+=======
+const Conv = ({ index }) => {
+>>>>>>> 8d2740530bc68f98590e309604a10605395c3100
   const [channels, setChannels] = useState(1);
   const [stride, setStride] = useState(1);
   const [padding, setPadding] = useState(1);
