@@ -63,12 +63,12 @@ class Board(object):
             move_curr = moves[players == self.current_player]
             move_oppo = moves[players != self.current_player]
             cnn_state[0][move_curr // self.width,
-                            move_curr % self.height] = 1.0
+                            move_curr % self.width] = 1.0
             cnn_state[1][move_oppo // self.width,
-                            move_oppo % self.height] = 1.0
+                            move_oppo % self.width] = 1.0
             # indicate the last move location
             cnn_state[2][self.last_move // self.width,
-                            self.last_move % self.height] = 1.0
+                            self.last_move % self.width] = 1.0
         if len(self.states) % 2 == 0:
             cnn_state[3][:, :] = 1.0  # indicate the colour to play
 
@@ -169,19 +169,20 @@ class Game(object):
         player1.set_player_ind(p1)
         player2.set_player_ind(p2)
         players = {p1: player1, p2: player2}
+        # First Move: Random
+        if start_player==1: # probably change this to detect if it is ai or not
+            first_move = random.sample([14, 15, 20, 21], 1)[0]
+            self.board.do_move(first_move)
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
-        # First Move: Random
-        first_move = random.sample([14, 15, 20, 21], 1)[0]
-        self.board.do_move(first_move)
-        if is_shown:
-                self.graphic(self.board, player1.player, player2.player)
         while True:
             current_player = self.board.get_current_player()
             player_in_turn = players[current_player]
             move = player_in_turn.get_action(self.board)
             self.board.do_move(move)
             if is_shown:
+                # Display how random the policy is (eps): 0 is greedy, 1 is pure random
+                print(move//self.board.width, move%self.board.width)
                 self.graphic(self.board, player1.player, player2.player)
             end, winner = self.board.game_end()
             if end:
@@ -227,3 +228,36 @@ class Game(object):
                     else:
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
+
+if __name__ = "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-m", "--model", help = "Model that you are trying to run with")
+    parser.add_argument("-o", "--opponent", help = "Opponent model")
+    parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
+    args = parser.parse_args()
+
+    f = open(args.game_config, encoding='utf-8')
+    data = json.loads(f.read())
+    
+    width = data["board"]["board_width"]
+    height = data["board"]["board_height"]
+    n_in_row = data["board"]["n_in_row"]
+    board = Board(width=width, height=height, n_in_row=n_in_row)
+    game = Game(board)
+
+    player1_data = data["player1"]
+    player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"])
+    player1 = MCTSPlayer(player1_policy.policy_value_fn,
+                                c_puct=5,
+                                n_playout=400)  # set larger n_playout for better performance
+
+    player2_data = data["player2"]
+    player2_policy = PolicyValueNet(width, height, player2_data["nn_information"], model_file=player2_data["model_path"])
+    player2 = MCTSPlayer(player2_policy.policy_value_fn,
+                                c_puct=5,
+                                n_playout=400)
+
+    game.start_play()

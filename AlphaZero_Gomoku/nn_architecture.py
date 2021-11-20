@@ -196,7 +196,7 @@ class PolicyValueNet():
         else: # GNN
             state_loader = DataLoader(dataset=[Data(x=Variable(torch.FloatTensor(state_batch[i].reshape(4, self.board_width*self.board_height).T).to(self.device)),
                     edge_index=self.edge_index) for i in range(len(state_batch))], batch_size=len(state_batch))
-            state = next(iter(state_loader))
+            state = next(iter(state_loader)).to(self.device)
             log_act_probs, value = self.policy_value_net(state.x, state.edge_index, state.batch)
 
         act_probs = np.exp(log_act_probs.data.cpu().numpy())
@@ -223,7 +223,7 @@ class PolicyValueNet():
 
             log_act_probs, value = self.policy_value_net(
                     Variable(torch.from_numpy(current_state)).to(self.device).float(), 
-                    self.edge_index, torch.LongTensor([0 for _ in range(self.board_width*self.board_height)]))
+                    self.edge_index.to(self.device), torch.LongTensor(np.array([0 for _ in range(self.board_width*self.board_height)])))
         
         act_probs = np.exp(log_act_probs.data.cpu().numpy().flatten())
         act_probs = zip(legal_positions, act_probs[legal_positions])
@@ -238,7 +238,7 @@ class PolicyValueNet():
         else: # GNN
             state_loader = DataLoader(dataset=[Data(x=Variable(torch.FloatTensor(state_batch[i].reshape(4, self.board_width*self.board_height).T).to(self.device)),
                     edge_index=self.edge_index) for i in range(len(state_batch))], batch_size=len(state_batch))
-            state = next(iter(state_loader))
+            state = next(iter(state_loader)).to(self.device)
             log_act_probs, value = self.policy_value_net(state.x, state.edge_index, state.batch)
 
         mcts_probs = Variable(torch.FloatTensor(mcts_probs).to(self.device))

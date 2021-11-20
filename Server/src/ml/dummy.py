@@ -6,7 +6,7 @@ def main():
     print("start main")
     while sec < 500:
         time.sleep(1)
-        sys.stdout.write("sec: {sec}")
+        sys.stdout.write(f"sec: {sec}")
         sys.stdout.flush()
         sec += 1
 

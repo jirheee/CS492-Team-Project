@@ -14,7 +14,7 @@ class PythonSpawner {
 
   public run() {
     return new Promise((resolve, reject) => {
-      this.process = spawn('python3', [`/home/node/app/src/ml/dummy.py`]);
+      this.process = spawn('python3', [this.path]);
 
       console.log('spawned process');
       console.log(this.process.spawnfile);

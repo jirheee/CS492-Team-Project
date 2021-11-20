@@ -3,3 +3,4 @@ AlphaZero_Gomoku/.vscode/
 AlphaZero_Gomoku/__pycache__/
 AlphaZero_Gomoku/runs/
 Server/src/__pycache__/
+Server/src/ml/AlphaZero_Gomoku/

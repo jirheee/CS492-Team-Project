@@ -8,6 +8,7 @@ Input your move in the format: 2,3
 
 import json
 import torch
+import random
 
 from game import Board, Game
 from mcts_pure import MCTSPlayer as MCTS_Pure
@@ -69,7 +70,12 @@ def run(data):
         human =  Human()
 
         # set start_player=0 for human first
-        game.start_play(human, player2, start_player=1, is_shown=1)
+
+        # For random starting player, use 
+        random.seed();start_player = random.randrange(2)
+
+        #start_player = 1
+        game.start_play(human, player2, start_player=start_player, is_shown=1)
     except KeyboardInterrupt:
         print('\n\rquit')
 
