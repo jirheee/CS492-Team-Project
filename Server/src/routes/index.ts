@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import agent from './agent';
 
 export default () => {
   const route = Router();
@@ -6,6 +7,7 @@ export default () => {
     console.log('status req');
     res.json({ data: 'Hello' });
   });
+  agent(route);
   return route;
 };
 
