@@ -6,11 +6,12 @@ import { getBlockColor } from '../../lib/util';
 interface BlockProps {
   children?: React.ReactElement[];
   layerType: LayerType;
-  index: number;
+  isEditable: boolean;
 }
 
-const BaseBlock = ({ children, layerType, index }: BlockProps) => {
+const BaseBlock = ({ children, layerType, isEditable }: BlockProps) => {
   const [hover, setHover] = useState(false);
+
   return (
     <Flex
       w={100}
@@ -23,21 +24,14 @@ const BaseBlock = ({ children, layerType, index }: BlockProps) => {
       textAlign="center"
       position="relative"
       onMouseEnter={() => {
-        setHover(true);
+        isEditable && setHover(true);
       }}
       onMouseLeave={() => {
-        setHover(false);
+        isEditable && setHover(false);
       }}
     >
-      {hover && (
-        <CloseButton
-          onClick={() => {
-            console.log(index);
-          }}
-          position="absolute"
-          right={0}
-          top={0}
-        />
+      {hover && isEditable && (
+        <CloseButton position="absolute" right={0} top={0} />
       )}
       <Text fontWeight="bold">{layerType}</Text>
       {children}

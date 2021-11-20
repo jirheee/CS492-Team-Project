@@ -4,7 +4,7 @@ import {
   Route,
   Redirect
 } from 'react-router-dom';
-import { ChakraProvider, theme, Heading } from '@chakra-ui/react';
+import { ChakraProvider, theme, Box } from '@chakra-ui/react';
 // import { ColorModeSwitcher } from './ColorModeSwitcher';
 import {
   MainIndexPage,
@@ -42,23 +42,25 @@ export const App = () => {
   return (
     <ChakraProvider theme={theme}>
       {/* <ColorModeSwitcher /> */}
-      <Heading>{`http response: ${text}`}</Heading>
+      {/* <Heading>{`http response: ${text}`}</Heading>
       <Heading>{`socket response: ${socketResponseText} socket connected: ${
         connected ? 'connected' : 'disconnected'
-      }`}</Heading>
-      <Router>
-        <Switch>
-          <Route exact path="/" render={MainIndexPage} />
-          <Route exact path="/agent" render={AgentIndexPage} />
-          <Route exact path="/agent/create" render={AgentCreatePage} />
-          <Route exact path="/battle" render={BattleIndexPage} />
-          <Route exact path="/battle" render={BattleIndexPage} />
-          <Route exact path="/battle/game" render={BattlePage} />
-          <Route path="/*">
-            <Redirect to="/" />
-          </Route>
-        </Switch>
-      </Router>
+      }`}</Heading> */}
+      <Box w="100vw" h="100vh">
+        <Router>
+          <Switch>
+            <Route exact path="/" render={MainIndexPage} />
+            <Route exact path="/agent" render={AgentIndexPage} />
+            <Route exact path="/agent/create" render={AgentCreatePage} />
+            <Route exact path="/battle" render={BattleIndexPage} />
+            <Route exact path="/battle" render={BattleIndexPage} />
+            <Route exact path="/battle/game" render={BattlePage} />
+            <Route path="/*">
+              <Redirect to="/" />
+            </Route>
+          </Switch>
+        </Router>
+      </Box>
     </ChakraProvider>
   );
 };

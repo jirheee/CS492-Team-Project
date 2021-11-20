@@ -6,9 +6,37 @@ const getBlockColor = (layerType: LayerType) => {
       return 'yellow.100';
     case LayerType.Conv:
       return 'blue.300';
-    default:
+    case LayerType.GATConv:
+      return 'orange.50';
+    case LayerType.GCNConv:
+      return 'orange.100';
+    case LayerType.GINConv:
+      return 'orange.200';
+    case LayerType.SAGEConv:
       return 'orange.300';
+    case LayerType.SGConv:
+      return 'orange.400';
   }
 };
 
-export { getBlockColor };
+const isInt = value => {
+  return /^\+?(0|[1-9]\d*)$/.test(value);
+};
+
+const getGnnAvailableLayerTypes = () => [
+  LayerType.BatchNorm,
+  LayerType.GATConv,
+  LayerType.GCNConv,
+  LayerType.GINConv,
+  LayerType.SAGEConv,
+  LayerType.SGConv
+];
+
+const getCnnAvailableLayerTypes = () => [LayerType.BatchNorm, LayerType.Conv];
+
+export {
+  getBlockColor,
+  isInt,
+  getGnnAvailableLayerTypes,
+  getCnnAvailableLayerTypes
+};
