@@ -4,11 +4,7 @@ import {
   Route,
   Redirect
 } from 'react-router-dom';
-<<<<<<< HEAD
 import { ChakraProvider, theme, Box } from '@chakra-ui/react';
-=======
-import { ChakraProvider, theme, Heading } from '@chakra-ui/react';
->>>>>>> 8d2740530bc68f98590e309604a10605395c3100
 // import { ColorModeSwitcher } from './ColorModeSwitcher';
 import {
   MainIndexPage,
