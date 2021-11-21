@@ -17,14 +17,15 @@ const AgentCreatePage = () => {
     const { target } = event;
     console.log(
       JSON.stringify({
+        name: target[0].value,
         board: {
-          board_width: +target[1].value,
-          board_height: +target[1].value,
-          n_in_row: +target[2].value
+          board_width: +target[2].value,
+          board_height: +target[2].value,
+          n_in_row: +target[3].value
         },
-        nn_type: target[0].value,
+        nn_type: target[1].value,
         layers,
-        activ_func: target[3].value
+        activ_func: target[4].value
       })
     );
     // Request.post('/create/agent', JSON.stringify(layers));
