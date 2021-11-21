@@ -51,7 +51,9 @@ export const App = () => {
           <Switch>
             <Route exact path="/" render={MainIndexPage} />
             <Route exact path="/agent" render={AgentIndexPage} />
-            <Route exact path="/agent/create" render={AgentCreatePage} />
+            <Route exact path="/agent/create">
+              <AgentCreatePage />
+            </Route>
             <Route exact path="/battle" render={BattleIndexPage} />
             <Route exact path="/battle" render={BattleIndexPage} />
             <Route exact path="/battle/game" render={BattlePage} />
