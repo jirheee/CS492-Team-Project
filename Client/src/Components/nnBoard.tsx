@@ -1,12 +1,11 @@
 import React from 'react';
 import { Flex } from '@chakra-ui/react';
 import { ConvLayer, GraphConvLayer, Layer } from '../model/types';
-import Request from '../lib/api/request';
 import { createLayerElement } from './layers';
 
 interface NNBoardProps {
   layers: (ConvLayer | GraphConvLayer | Layer)[];
-  setLayers: React.Dispatch<
+  setLayers?: React.Dispatch<
     React.SetStateAction<(ConvLayer | GraphConvLayer | Layer)[]>
   >;
 }
@@ -15,6 +14,7 @@ const NNBoard = ({ layers, setLayers }: NNBoardProps) => {
   return (
     <Flex
       h="full"
+      minH="400px"
       w="full"
       border="solid"
       borderColor="gray.200"
@@ -30,18 +30,20 @@ const NNBoard = ({ layers, setLayers }: NNBoardProps) => {
           i,
           undefined,
           () => {
-            setLayers(layerArr => {
-              const newLayerArr = [...layerArr];
-              newLayerArr.splice(i, 1);
-              return newLayerArr;
-            });
+            setLayers &&
+              setLayers(layerArr => {
+                const newLayerArr = [...layerArr];
+                newLayerArr.splice(i, 1);
+                return newLayerArr;
+              });
           },
           newLayer => () => {
-            setLayers(layerArr => {
-              const newLayerArr = [...layerArr];
-              newLayerArr.splice(i, 1, newLayer);
-              return newLayerArr;
-            });
+            setLayers &&
+              setLayers(layerArr => {
+                const newLayerArr = [...layerArr];
+                newLayerArr.splice(i, 1, newLayer);
+                return newLayerArr;
+              });
           }
         )
       )}

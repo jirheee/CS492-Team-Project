@@ -49,6 +49,10 @@ const NNConfigForm = ({
       onSubmit={handleSubmit}
     >
       <FormControl isRequired>
+        <FormLabel>Name</FormLabel>
+        <Input placeholder="Type in your Agent's Nickname" />
+      </FormControl>
+      <FormControl isRequired>
         <FormLabel>Network Type</FormLabel>
         <Select onChange={handleNNTypeChange} defaultValue={NNType.CNN}>
           <option value={NNType.CNN}>{NNType.CNN}</option>
