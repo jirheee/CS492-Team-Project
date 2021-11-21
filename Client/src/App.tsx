@@ -10,13 +10,14 @@ import {
   MainIndexPage,
   AgentIndexPage,
   BattleIndexPage,
-  BattlePage
+  BattlePage,
+  AgentCreatePage,
+  AgentManagementPage
 } from './pages';
 import { useSocket } from './lib/socket';
 import { useEffect, useState } from 'react';
 
 import Request from './lib/api/request';
-import AgentCreatePage from './pages/agentCreatePage';
 
 export const App = () => {
   const [text, setText] = useState('');
@@ -49,12 +50,13 @@ export const App = () => {
       <Box w="100vw" h="100vh">
         <Router>
           <Switch>
-            <Route exact path="/" render={MainIndexPage} />
-            <Route exact path="/agent" render={AgentIndexPage} />
-            <Route exact path="/agent/create" render={AgentCreatePage} />
-            <Route exact path="/battle" render={BattleIndexPage} />
-            <Route exact path="/battle" render={BattleIndexPage} />
-            <Route exact path="/battle/game" render={BattlePage} />
+            <Route exact path="/" component={MainIndexPage} />
+            <Route exact path="/agent" component={AgentIndexPage} />
+            <Route exact path="/agent/create" component={AgentCreatePage} />
+            <Route exact path="/agent/manage" component={AgentManagementPage} />
+            <Route exact path="/battle" component={BattleIndexPage} />
+            <Route exact path="/battle" component={BattleIndexPage} />
+            <Route exact path="/battle/game" component={BattlePage} />
             <Route path="/*">
               <Redirect to="/" />
             </Route>
