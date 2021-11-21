@@ -229,7 +229,7 @@ class Game(object):
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()

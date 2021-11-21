@@ -22,7 +22,7 @@ class Server {
       console.log(`Server running on port ${config.HTTP_PORT}`);
     });
 
-    // const process = new PythonSpawner('./dummy.py');
+    // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-r']);
     // await process.run();
   }
 }

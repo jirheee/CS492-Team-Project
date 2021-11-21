@@ -4,7 +4,9 @@ WORKDIR /home/node/app
 
 COPY package*.json ./
 
-RUN  apt-get update || : && apt-get install python3-pip -y
+RUN apt-get update || : && apt-get install python3-pip -y
+
+RUN apt-get install tzdata && cp /usr/share/zoneinfo/ROK /etc/localtime && echo "ROK" > /etc/timezone
 
 RUN pip3 install torch==1.10.0 torchvision==0.11.1
 
