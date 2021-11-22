@@ -51,7 +51,6 @@ const createLayer = (
 
 const getGnnAvailableLayerTypes = () =>
   [
-    LayerType.BatchNorm,
     LayerType.GATConv,
     LayerType.GCNConv,
     LayerType.GINConv,
