@@ -53,7 +53,7 @@ class TrainPipeline():
         self.c_puct = 5
         self.play_batch_size = 1
         self.kl_targ = 0.02
-        self.check_freq = 100
+        self.check_freq = 1
         self.best_win_ratio = 0.0
         
         # num of simulations used for the pure mcts, which is used as
@@ -107,7 +107,7 @@ class TrainPipeline():
             play_data = self.get_equi_data(play_data)
             self.data_buffer.extend(play_data)
 
-    def policy_update(self):
+    def policy_update(self, epoch):
         """update the policy-value net"""
         mini_batch = random.sample(self.data_buffer, self.batch_size)
         state_batch = np.array([data[0] for data in mini_batch])
@@ -151,6 +151,7 @@ class TrainPipeline():
         #                 entropy,
         #                 explained_var_old,
         #                 explained_var_new))
+        print(f"epoch:{epoch:05d} | {loss}", flush=True)
         self.writer.add_scalar("KL Divergence", kl, self.step)
         self.writer.add_scalar("Loss", loss, self.step)
         self.writer.add_scalar("Entropy", entropy, self.step)
@@ -184,12 +185,13 @@ class TrainPipeline():
         try:        
             timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
             start = time.time()
+            print(self.uuid, timestamp)
             for ii in range(self.epochs):
                 print(f"epoch {ii:05d} | elapsed time: {time.time()-start:.2f}",flush=True)
 
                 self.collect_selfplay_data(self.play_batch_size)
                 if len(self.data_buffer) > self.batch_size:
-                    loss, entropy = self.policy_update()
+                    loss, entropy = self.policy_update(ii)
                 # check the performance of the current model,
                 # and save the model params
                 if (ii+1) % self.check_freq == 0:

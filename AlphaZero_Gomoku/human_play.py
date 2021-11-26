@@ -57,16 +57,10 @@ def run(data):
 
         # ############### human VS AI ###################
         player1_data = data["player1"]
-        player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"])
+        player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"],name = Opponent)
         player1 = MCTSPlayer(player1_policy.policy_value_fn,
                                  c_puct=5,
                                  n_playout=400)  # set larger n_playout for better performance
-
-        player2_data = data["player2"]
-        player2_policy = PolicyValueNet(width, height, player2_data["nn_information"], model_file=player2_data["model_path"])
-        player2 = MCTSPlayer(player2_policy.policy_value_fn,
-                                 c_puct=5,
-                                 n_playout=400)
         human =  Human()
 
         # set start_player=0 for human first
@@ -75,11 +69,20 @@ def run(data):
         random.seed();start_player = random.randrange(2)
 
         #start_player = 1
-        game.start_play(human, player2, start_player=start_player, is_shown=1)
+        game.start_play(human, player1, start_player=start_player, is_shown=1)
     except KeyboardInterrupt:
         print('\n\rquit')
 
 
 if __name__ == '__main__':
-    data = './data/battle_example.json'
+    
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
+    args = parser.parse_args()
+    
+    data = args.game_config
+
     run(data)

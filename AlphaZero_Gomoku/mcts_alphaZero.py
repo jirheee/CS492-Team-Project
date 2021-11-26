@@ -172,9 +172,10 @@ class MCTSPlayer(object):
     """AI player based on MCTS"""
 
     def __init__(self, policy_value_function,
-                 c_puct=5, n_playout=2000, is_selfplay=0):
+                 c_puct=5, n_playout=2000, is_selfplay=0, name = "Unknown"):
         self.mcts = MCTS(policy_value_function, c_puct, n_playout)
         self._is_selfplay = is_selfplay
+        self.name = name
 
     def set_player_ind(self, p):
         self.player = p
@@ -215,4 +216,4 @@ class MCTSPlayer(object):
             print("WARNING: the board is full")
 
     def __str__(self):
-        return "MCTS {}".format(self.player)
+        return f"Player {self.player}: {self.name}"

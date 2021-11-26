@@ -6,6 +6,12 @@ import random
 
 import numpy as np
 
+import json
+from mcts_pure import MCTSPlayer as MCTS_Pure
+from mcts_alphaZero import MCTSPlayer
+from nn_architecture import PolicyValueNet
+import random
+
 
 class Board(object):
     """board for the game"""
@@ -157,7 +163,7 @@ class Game(object):
                     print('O'.center(8), end='')
                 else:
                     print('_'.center(8), end='')
-            print('\r\n\r\n')
+            print('\r\n\r\n', flush = True)
 
     def start_play(self, player1, player2, start_player=0, is_shown=1):
         """start a game between two players"""
@@ -233,10 +239,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-
-    parser.add_argument("-m", "--model", help = "Model that you are trying to run with")
-    parser.add_argument("-o", "--opponent", help = "Opponent model")
     parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
+    parser.add_argument("-R", "--rounds", type = int, help="How many rounds do you want to play?")
     args = parser.parse_args()
 
     f = open(args.game_config, encoding='utf-8')
@@ -252,12 +256,14 @@ if __name__ == "__main__":
     player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"])
     player1 = MCTSPlayer(player1_policy.policy_value_fn,
                                 c_puct=5,
-                                n_playout=400)  # set larger n_playout for better performance
+                                n_playout=400, name = "Our Player")  # set larger n_playout for better performance
 
     player2_data = data["player2"]
     player2_policy = PolicyValueNet(width, height, player2_data["nn_information"], model_file=player2_data["model_path"])
     player2 = MCTSPlayer(player2_policy.policy_value_fn,
                                 c_puct=5,
-                                n_playout=400)
-
-    game.start_play()
+                                n_playout=400, name = "Opponent")
+    random.seed()
+    for ii in range(1,args.rounds+1):
+        game.start_play(player1,player2,random.randrange(2), is_shown = 1)
+        print(f"Round {ii} ended",end = "\n\n")
