@@ -84,3 +84,33 @@ You can check if you are in the container and the volum by executing `ls`. You s
 Dockerfile  docker-compose.yml  node_modules  package.json  tsconfig.json
 README.md   entrypoint.sh       nodemon.json  src           yarn.lock
 ```
+# Running with GPU in docker-compose
+First, [nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) should be installed in your local machine.  
+**Make sure you terminate all docker containers before running the code**  
+``` 
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+Also, in order to use the specific implementation mentioned in this build, docker-compose >=`v1.28.0+` should be installed. More details about `docker-compose`'s gpu support can be found in [this article](https://docs.docker.com/compose/gpu-support/).  
+Most of the times, `sudo apt docker-compose` **will not give you the latest docker-compose**. To install the compatible version use the command below for systems with linux AMD64(aka x86-64).  
+
+``` 
+sudo curl -L "https://github.com/docker/compose/releases/download/2.1.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 
+```  
+
+If your system uses other OS or chipset, follow [this article](https://docs.docker.com/compose/install/) about installing the latest `docker-compose`.
+
+Now, you can add 
+```
+  #cs492i-api-server: <You don't have to add this line>
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+to the `docker-compose.yml` under `cs49i-api-server:`

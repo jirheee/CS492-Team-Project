@@ -26,6 +26,13 @@ services:
     volumes:
       - ./src:/home/node/app/src
     container_name: cs492i-api-server
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     expose:
       - 5000
     ports:
