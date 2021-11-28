@@ -73,21 +73,21 @@ class TrainPipeline():
         self.c_puct = 5
         self.play_batch_size = 1
         self.kl_targ = 0.02
-        self.check_freq = 33
+        self.check_freq = 100
         self.best_win_ratio = 0.0
-        self.eval_rounds = 100
+        self.eval_rounds = 50
         
         # num of simulations used for the pure mcts, which is used as
         # the opponent to evaluate the trained policy
         self.pure_mcts_playout_num = 1000
 
         if resume:
-            model_file = f"../models/{str(self.uuid)}/best.model"
+            model_file = f"../models/{str(self.uuid)}/curr.model"
             print(f"Loading checkpoint from: {str(self.uuid)}")
         else:
             model_file = None
             print("Training new checkpoints.", end = " ")
-            if os.path.exists(f"../models/{str(self.uuid)}/best.model"):
+            if os.path.exists(f"../models/{str(self.uuid)}/curr.model"):
                 print("Overriding "+f"../models/{str(self.uuid)}/best.model", end = "")
             print(flush=True)
         self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, data["nn_information"], model_file = model_file)
@@ -222,7 +222,7 @@ class TrainPipeline():
                 # and save the model params
                 if (ii+1) % self.check_freq == 0:
                     # print("\ncurrent self-play batch: {}".format(i+1))
-                    win_ratio = self.policy_evaluate()
+                    win_ratio = self.policy_evaluate(self.eval_rounds)
                     self.policy_value_net.save_model(f"../models/"
                                                     f"{self.uuid}/"
                                                     f"curr.model")
