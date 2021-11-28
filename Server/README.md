@@ -3,6 +3,7 @@
 If you are not familiar with Docker, [this video](https://www.youtube.com/watch?v=3c-iBn73dDE&t=7081s) was quite helpful for me understanding the files in this repository.  
 
 ## How to launch the server (and the database) on Docker  
+Most of the commands should be run at `Server/.` directory.  
 0. If using VSCode, install Docker extension.  
     - opening either `Dockerfile` or `docker-compose.yml` should prompt you to install a **[Docker extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)**.  
 1. Next, you should install a Docker CLI or **[Docker Desktop](https://www.docker.com/products/docker-desktop)**.  
@@ -27,7 +28,14 @@ If you are not familiar with Docker, [this video](https://www.youtube.com/watch?
         docker-compose down -v --rmi local
         ```
         to cleanup the mess. You can do this after `Ctrl+C` or in a separate instance of terminal.  
-    
+
+By default, the AI code is **NOT** included in the Server.  
+To run the server with a working AI training/battle/playing, use the code below in `Server/.` directory
+```
+rm -rf ./src/ml/AlphaZero_Gomoku ; sudo cp -r ../AlphaZero_Gomoku/ ./src/ml/AlphaZero_Gomoku
+```
+
+### Trouble shooting
 If you see 
 ```
 cs492i-api-server  | Server running on port 5000

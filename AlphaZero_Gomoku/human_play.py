@@ -57,7 +57,7 @@ def run(data):
 
         # ############### human VS AI ###################
         player1_data = data["player1"]
-        player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"],name = Opponent)
+        player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"],name = "Opponent")
         player1 = MCTSPlayer(player1_policy.policy_value_fn,
                                  c_puct=5,
                                  n_playout=400)  # set larger n_playout for better performance

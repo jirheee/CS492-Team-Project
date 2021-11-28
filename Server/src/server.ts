@@ -23,8 +23,8 @@ class Server {
     });
 
     const uuid = "1aaa41fa-526e-47c6-916c-07906127df3c"
-    const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid]);
-    // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r']);
+    // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid]);
+    const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r']);
 
     //var game_options = ["-g", "./data/battle_example.json"]
     // var game_options = ["-g", "./data/battle_example.json", "-R", "10"]

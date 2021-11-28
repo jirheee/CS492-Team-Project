@@ -16,9 +16,29 @@ from mcts_pure import MCTSPlayer as MCTS_Pure
 from mcts_alphaZero import MCTSPlayer
 from nn_architecture import PolicyValueNet
 
+import os
 import argparse
 import time
 import re
+import threading
+import copy
+
+class Eval_Thread(threading.Thread):
+    def __init__(self, train_pipeline, curr_mcts, pure_mcts, round_num, winner_cnt):
+        threading.Thread.__init__(self)
+        self.train_pipeline = train_pipeline
+        self.game = copy.deepcopy(train_pipeline.game)
+        self.curr_mcts = copy.deepcopy(curr_mcts)
+        self.pure_mcts = copy.deepcopy(pure_mcts)
+        self.round =round_num
+        self.winner_cnt = winner_cnt
+    def run(self):
+        winner = self.game.start_play(self.curr_mcts,
+                                          self.pure_mcts,
+                                          start_player=self.round % 2,
+                                          is_shown=0)
+        with winner_cnt_lock:
+            self.winner_cnt[winner]+=1
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -53,8 +73,9 @@ class TrainPipeline():
         self.c_puct = 5
         self.play_batch_size = 1
         self.kl_targ = 0.02
-        self.check_freq = 1
+        self.check_freq = 33
         self.best_win_ratio = 0.0
+        self.eval_rounds = 100
         
         # num of simulations used for the pure mcts, which is used as
         # the opponent to evaluate the trained policy
@@ -65,6 +86,10 @@ class TrainPipeline():
             print(f"Loading checkpoint from: {str(self.uuid)}")
         else:
             model_file = None
+            print("Training new checkpoints.", end = " ")
+            if os.path.exists(f"../models/{str(self.uuid)}/best.model"):
+                print("Overriding "+f"../models/{str(self.uuid)}/best.model", end = "")
+            print(flush=True)
         self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, data["nn_information"], model_file = model_file)
         self.mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn,
                                       c_puct=self.c_puct,
@@ -151,7 +176,7 @@ class TrainPipeline():
         #                 entropy,
         #                 explained_var_old,
         #                 explained_var_new))
-        print(f"epoch:{epoch:05d} | {loss}", flush=True)
+        print(f"epoch {epoch:05d} | loss: {loss}", end = "", flush=True)
         self.writer.add_scalar("KL Divergence", kl, self.step)
         self.writer.add_scalar("Loss", loss, self.step)
         self.writer.add_scalar("Entropy", entropy, self.step)
@@ -169,12 +194,13 @@ class TrainPipeline():
         pure_mcts_player = MCTS_Pure(c_puct=5,
                                      n_playout=self.pure_mcts_playout_num)
         win_cnt = defaultdict(int)
-        for i in range(n_games):
-            winner = self.game.start_play(current_mcts_player,
-                                          pure_mcts_player,
-                                          start_player=i % 2,
-                                          is_shown=0)
-            win_cnt[winner] += 1
+        threads = []
+        for ii in range(n_games):
+            new_thread = Eval_Thread(self, current_mcts_player, pure_mcts_player, ii, win_cnt)
+            threads.append(new_thread)
+            new_thread.start()
+        for t in threads:
+            t.join()
         win_ratio = 1.0*(win_cnt[1] + 0.5*win_cnt[-1]) / n_games
         print("num_playouts:{}, win: {}, lose: {}, tie:{}".format(
                 n_games, win_cnt[1], win_cnt[2], win_cnt[-1]))
@@ -187,7 +213,7 @@ class TrainPipeline():
             start = time.time()
             print(self.uuid, timestamp)
             for ii in range(self.epochs):
-                print(f"epoch {ii:05d} | elapsed time: {time.time()-start:.2f}",flush=True)
+                print(f"epoch {ii:05d} | elapsed time: {time.time()-start:.2f}",end = "",flush=True)
 
                 self.collect_selfplay_data(self.play_batch_size)
                 if len(self.data_buffer) > self.batch_size:
@@ -211,7 +237,7 @@ class TrainPipeline():
                                 self.pure_mcts_playout_num < 5000):
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
-            self.policy_evaluate()
+            self.policy_evaluate(self.eval_rounds)
             # Save at the end of training             
             self.policy_value_net.save_model(f"../models/"
                                             f"{self.uuid}/"
@@ -219,6 +245,8 @@ class TrainPipeline():
             self.writer.close()
         except KeyboardInterrupt:
             print('\n\rquit')
+        timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
+        print("Train finished" f"{self.uuid} {timestamp}")
             
 if __name__ == '__main__':
 
@@ -226,6 +254,7 @@ if __name__ == '__main__':
     parser.add_argument("-u","--uuid", help="UUID is used for reading model parameters and saving, loading models")
     parser.add_argument("-r","--resume", action = "store_true" , help="Resume from saved checkpoint", default=False)
     args = parser.parse_args()
+    winner_cnt_lock = threading.Lock()
 
     uuid=args.uuid
     # comment this line out before deploying
