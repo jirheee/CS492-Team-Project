@@ -22,7 +22,7 @@ class Server {
       console.log(`Server running on port ${config.HTTP_PORT}`);
     });
 
-    const uuid = "1aaa41fa-526e-47c6-916c-07906127df3c"
+    const uuid = "0000"
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid]);
     const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r']);
 

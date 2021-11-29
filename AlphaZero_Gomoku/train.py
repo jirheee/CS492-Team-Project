@@ -75,22 +75,21 @@ class TrainPipeline():
         self.kl_targ = 0.02
         self.check_freq = 100
         self.best_win_ratio = 0.0
-        self.eval_rounds = 50
+        self.eval_rounds = 25
         
         # num of simulations used for the pure mcts, which is used as
         # the opponent to evaluate the trained policy
         self.pure_mcts_playout_num = 1000
-
-        if resume:
-            model_file = f"../models/{str(self.uuid)}/curr.model"
+        model_file_path = f"../models/{str(self.uuid)}/curr.model"
+        if resume and os.path.exists(model_file_path):
             print(f"Loading checkpoint from: {str(self.uuid)}")
         else:
-            model_file = None
             print("Training new checkpoints.", end = " ")
-            if os.path.exists(f"../models/{str(self.uuid)}/curr.model"):
-                print("Overriding "+f"../models/{str(self.uuid)}/best.model", end = "")
+            if os.path.exists(model_file_path):
+                print("Overriding "+model_file_path, end = "")
+            model_file_path = None
             print(flush=True)
-        self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, data["nn_information"], model_file = model_file)
+        self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, data["nn_information"], model_file = model_file_path)
         self.mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn,
                                       c_puct=self.c_puct,
                                       n_playout=self.n_playout,
@@ -257,7 +256,5 @@ if __name__ == '__main__':
     winner_cnt_lock = threading.Lock()
 
     uuid=args.uuid
-    # comment this line out before deploying
-    uuid = "1aaa41fa-526e-47c6-916c-07906127df3c"
     training_pipeline = TrainPipeline(uuid, args.resume)
     training_pipeline.run()
