@@ -1,13 +1,12 @@
-import Model from './model';
 import { HyperParameters } from './types';
 
 class TrainInfo {
   public hyperparameters: HyperParameters;
-  public nn_information: Model;
+  public modelUuid: string;
 
-  constructor(hyperParameters: HyperParameters, model: Model) {
+  constructor(hyperParameters: HyperParameters, uuid: string) {
     this.hyperparameters = hyperParameters;
-    this.nn_information = model;
+    this.modelUuid = uuid;
   }
 }
 

@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  FormControl,
-  FormLabel,
   Button,
   Popover,
   PopoverTrigger,
@@ -10,12 +8,6 @@ import {
   IconButton,
   PopoverHeader,
   PopoverBody,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Select,
   Grid
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
@@ -25,60 +17,8 @@ import {
   pascalCaseToSnakeCase,
   snakeCaseToPascalCase
 } from '../../lib/util';
-
-interface NumberInputProps {
-  id: string;
-  label: string;
-  defaultValue: number;
-  min?: number;
-}
-
-interface InputProps {
-  label: string;
-  id: string;
-}
-
-const InputWithFieldName = ({
-  label,
-  id,
-  children
-}: React.PropsWithChildren<InputProps>) => {
-  return (
-    <FormControl display="grid" gridTemplateColumns="1fr 1fr" p={1}>
-      <FormLabel htmlFor={id} w="full" h="full" m={0} p={1}>
-        {label}
-      </FormLabel>
-      {children}
-    </FormControl>
-  );
-};
-
-const NumberInputWithFieldname = ({
-  label,
-  id,
-  defaultValue,
-  min
-}: NumberInputProps) => {
-  return (
-    <InputWithFieldName label={label} id={id}>
-      <NumberInput id={id} size="sm" defaultValue={defaultValue} min={min}>
-        <NumberInputField />
-        <NumberInputStepper>
-          <NumberIncrementStepper />
-          <NumberDecrementStepper />
-        </NumberInputStepper>
-      </NumberInput>
-    </InputWithFieldName>
-  );
-};
-
-const SelectInputWithFieldName = ({ children, label, id }) => {
-  return (
-    <InputWithFieldName label={label} id={id}>
-      <Select id={id}>{children}</Select>
-    </InputWithFieldName>
-  );
-};
+import NumberInputWithFieldname from '../Inputs/NumberInputWithFieldName';
+import SelectInputWithFieldName from '../Inputs/SelectInputWithFieldName';
 
 interface BlockConfigurePopoverProps<T> {
   layerProps: T;
