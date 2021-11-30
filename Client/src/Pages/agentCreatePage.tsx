@@ -24,8 +24,7 @@ const AgentCreatePage = () => {
           n_in_row: +target[3].value
         },
         nn_type: target[1].value,
-        layers,
-        activ_func: target[4].value
+        layers
       })
     );
     // Request.post('/create/agent', JSON.stringify(layers));

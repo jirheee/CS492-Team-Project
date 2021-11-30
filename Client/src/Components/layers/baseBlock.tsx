@@ -1,11 +1,11 @@
 import React from 'react';
 import { Flex, Text, CloseButton } from '@chakra-ui/react';
-import { LayerType } from '../../model/types';
+import { ActivationFunction, LayerType } from '../../model/types';
 import { getBlockColor } from '../../lib/util';
 import { ReactElement } from 'react-router/node_modules/@types/react';
 
 export interface BlockProps<T> {
-  layerType: LayerType;
+  layerType: LayerType | ActivationFunction;
   popover?: ReactElement;
   onClick?: () => void;
   onClose?: () => void;

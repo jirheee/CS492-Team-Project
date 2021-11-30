@@ -13,7 +13,6 @@ class Model {
   public board: Board = { board_height: 6, board_width: 6, n_in_row: 4 };
   public nn_type: NNType = NNType.CNN;
   public layers: Layer[] = [];
-  public activation: ActivationFunction = ActivationFunction.ReLU;
 
   public addLayer(layerType: LayerType) {
     switch (layerType) {
