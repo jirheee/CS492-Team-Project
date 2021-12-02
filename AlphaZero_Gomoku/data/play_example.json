@@ -1,0 +1,53 @@
+{
+    "board": {
+        "board_width": 6,
+        "board_height": 6,
+        "n_in_row": 4
+    },
+    "player1": {
+        "model_path": "../models/1aaa41fa-526e-47c6-916c-07906127df3c/curr.model",
+        "nn_information":{
+            "nn_type": "GNN",
+            "n_layers": 3,
+            "layer_0": {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            "layer_1": {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            "layer_2": {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            "activ_func": "ReLU"
+        }
+    },
+    "player2": {
+        "model_path": "../models/1aaa41fa-526e-47c6-916c-07906127df3c/best.model",
+        "nn_information":{
+            "nn_type": "GNN",
+            "n_layers": 3,
+            "layer_0": {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            "layer_1": {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            "layer_2": {
+                "layer_name": "SGConv",
+                "channels": 6,
+                "bias": "False"
+            },
+            "activ_func": "ReLU"
+        }
+    }
+}

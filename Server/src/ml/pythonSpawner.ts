@@ -5,16 +5,20 @@ class PythonSpawner {
 
   private path: string;
 
+  private file: string;
+
   private options: string[];
 
-  constructor(path: string, options: string[] = []) {
+  constructor(path: string, file: string, options: string[] = []) {
     this.path = path;
+    this.file = file;
     this.options = options;
   }
 
   public run() {
     return new Promise((resolve, reject) => {
-      this.process = spawn('python3', [`/home/node/app/src/ml/dummy.py`]);
+      var parameters = [this.file].concat(this.options)
+      this.process = spawn('python3', parameters, {cwd: this.path});
 
       console.log('spawned process');
       console.log(this.process.spawnfile);

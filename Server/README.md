@@ -3,6 +3,7 @@
 If you are not familiar with Docker, [this video](https://www.youtube.com/watch?v=3c-iBn73dDE&t=7081s) was quite helpful for me understanding the files in this repository.  
 
 ## How to launch the server (and the database) on Docker  
+Most of the commands should be run at `Server/.` directory.  
 0. If using VSCode, install Docker extension.  
     - opening either `Dockerfile` or `docker-compose.yml` should prompt you to install a **[Docker extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)**.  
 1. Next, you should install a Docker CLI or **[Docker Desktop](https://www.docker.com/products/docker-desktop)**.  
@@ -27,7 +28,14 @@ If you are not familiar with Docker, [this video](https://www.youtube.com/watch?
         docker-compose down -v --rmi local
         ```
         to cleanup the mess. You can do this after `Ctrl+C` or in a separate instance of terminal.  
-    
+
+By default, the AI code is **NOT** included in the Server.  
+To run the server with a working AI training/battle/playing, use the code below in `Server/.` directory
+```
+rm -rf ./src/ml/AlphaZero_Gomoku ; sudo cp -r ../AlphaZero_Gomoku/ ./src/ml/AlphaZero_Gomoku
+```
+
+### Trouble shooting
 If you see 
 ```
 cs492i-api-server  | Server running on port 5000
@@ -84,3 +92,33 @@ You can check if you are in the container and the volum by executing `ls`. You s
 Dockerfile  docker-compose.yml  node_modules  package.json  tsconfig.json
 README.md   entrypoint.sh       nodemon.json  src           yarn.lock
 ```
+# Running with GPU in docker-compose
+First, [nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) should be installed in your local machine.  
+**Make sure you terminate all docker containers before running the code**  
+``` 
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+Also, in order to use the specific implementation mentioned in this build, docker-compose >=`v1.28.0+` should be installed. More details about `docker-compose`'s gpu support can be found in [this article](https://docs.docker.com/compose/gpu-support/).  
+Most of the times, `sudo apt docker-compose` **will not give you the latest docker-compose**. To install the compatible version use the command below for systems with linux AMD64(aka x86-64).  
+
+``` 
+sudo curl -L "https://github.com/docker/compose/releases/download/2.1.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 
+```  
+
+If your system uses other OS or chipset, follow [this article](https://docs.docker.com/compose/install/) about installing the latest `docker-compose`.
+
+Now, you can add 
+```
+  #cs492i-api-server: <You don't have to add this line>
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+to the `docker-compose.yml` under `cs49i-api-server:`
