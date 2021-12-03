@@ -7,12 +7,10 @@ import random
 import numpy as np
 
 import json
-from mcts_pure import MCTSPlayer as MCTS_Pure
 from mcts_alphaZero import MCTSPlayer
-from nn_architecture import PolicyValueNet
+from nn_architecture import get_PVN_from_uuid
 import random
 
-import os
 
 class Board(object):
     """board for the game"""
@@ -194,7 +192,7 @@ class Game(object):
             move = player_in_turn.get_action(self.board)
             self.board.do_move(move)
             if journal:
-                battle_record["moves"].append(int(move))
+                battle_record["moves"].append((int(move//w), int(move%w)))
             if is_shown:
                 # Display how random the policy is (eps): 0 is greedy, 1 is pure random
                 print(move//self.board.width, move%self.board.width)
@@ -248,28 +246,7 @@ class Game(object):
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
 
-def get_PVN_from_uuid(uuid:str,model_option:str="best",force_cpu=False):
-    
-    model_config = f"../models/{uuid}/model.json"
-    with open(model_config, encoding='utf-8') as f:
-        model_config = json.loads(f.read())
-    # params of the board and the game
-    board_width = model_config["board"]["board_width"]
-    board_height = model_config["board"]["board_height"]
-    name = model_config["name"]
 
-    model_file_path = f"../models/{uuid}/{model_option}.model"
-    if os.path.exists(model_file_path):
-        print(f"Loading checkpoint from: {uuid}, {model_option}")
-    else:
-        print(f"{model_option}_model from uuid of {uuid} could not be found")
-        raise
-
-    policy_value_net = PolicyValueNet(board_width, board_height, model_config["nn_type"], model_config["layers"], model_file = model_file_path,force_cpu = force_cpu)
-    mcts_player = MCTSPlayer(policy_value_net.policy_value_fn,
-                                    c_puct=5,
-                                    n_playout=board_width*board_height*17,name=name)
-    return mcts_player
 
 if __name__ == "__main__":
     import argparse
@@ -291,7 +268,7 @@ if __name__ == "__main__":
     game = Game(board)
 
     player1_uuid = data["player1"]
-    player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)  # set larger n_playout for better performance
+    player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)
 
     player2_uuid = data["player2"]   
     player2 = get_PVN_from_uuid(player2_uuid,"curr",args.cpu)

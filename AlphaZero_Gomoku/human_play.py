@@ -11,9 +11,8 @@ import torch
 import random
 
 from game import Board, Game
-from mcts_pure import MCTSPlayer as MCTS_Pure
 from mcts_alphaZero import MCTSPlayer
-from nn_architecture import PolicyValueNet
+from nn_architecture import get_PVN_from_uuid
 
 
 class Human(object):
@@ -44,7 +43,7 @@ class Human(object):
         return "Human {}".format(self.player)
 
 
-def run(data):
+def run(data,force_cpu = False):
     f = open(data, encoding='utf-8')
     data = json.loads(f.read())
 
@@ -56,11 +55,9 @@ def run(data):
         game = Game(board)
 
         # ############### human VS AI ###################
-        player1_data = data["player1"]
-        player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"])
-        player1 = MCTSPlayer(player1_policy.policy_value_fn,
-                                 c_puct=5,
-                                 n_playout=400, name = "Opponent")  # set larger n_playout for better performance
+        
+        player1_uuid = data["player1"]
+        player1 = get_PVN_from_uuid(player1_uuid,"best",force_cpu) 
         human =  Human()
 
         # set start_player=0 for human first
@@ -81,8 +78,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
     parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
+    parser.add_argument("-c","--cpu", action="store_true",help="Force to run on CPU, without cuda", default=False)
     args = parser.parse_args()
     
     data = args.game_config
 
-    run(data)
+    run(data,args.cpu)

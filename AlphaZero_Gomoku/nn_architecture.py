@@ -12,6 +12,10 @@ from torch_geometric.loader import DataLoader
 import numpy as np
 from functools import reduce
 
+import os
+from mcts_alphaZero import MCTSPlayer
+import json
+
 def calculate_input_size(array):
     return reduce(lambda x, y: x * y, array)
 
@@ -285,3 +289,26 @@ class PolicyValueNet():
     def num_params(self):
         # Number of Trainable Parameters
         return sum(p.numel() for p in self.policy_value_net.parameters() if p.requires_grad)
+
+def get_PVN_from_uuid(uuid:str,model_option:str="best",force_cpu=False):
+    
+    model_config = f"../models/{uuid}/model.json"
+    with open(model_config, encoding='utf-8') as f:
+        model_config = json.loads(f.read())
+    # params of the board and the game
+    board_width = model_config["board"]["board_width"]
+    board_height = model_config["board"]["board_height"]
+    name = model_config["name"]
+
+    model_file_path = f"../models/{uuid}/{model_option}.model"
+    if os.path.exists(model_file_path):
+        print(f"Loading checkpoint from: {uuid}, {model_option}")
+    else:
+        print(f"{model_option}_model from uuid of {uuid} could not be found")
+        raise
+
+    policy_value_net = PolicyValueNet(board_width, board_height, model_config["nn_type"], model_config["layers"], model_file = model_file_path,force_cpu = force_cpu)
+    mcts_player = MCTSPlayer(policy_value_net.policy_value_fn,
+                                    c_puct=5,
+                                    n_playout=board_width*board_height*17,name=name)
+    return mcts_player
