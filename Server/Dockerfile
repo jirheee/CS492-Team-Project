@@ -14,7 +14,7 @@ RUN pip3 install torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cu102.ht
 
 RUN pip3 install torch-sparse torch-cluster -f https://pytorch-geometric.com/whl/torch-1.10.0+cu102.html
 
-RUN pip3 install torch-geometric tensorboard
+RUN pip3 install torch-geometric tensorboard=0.6.0
 
 RUN yarn
 

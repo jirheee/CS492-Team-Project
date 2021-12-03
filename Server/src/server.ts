@@ -23,9 +23,11 @@ class Server {
     });
 
     // 1. train.py - Example of options and thread to train models
-    //const uuid = "0000"
+    // const uuid = "1aaa41fa-526e-47c6-916c-07906127df3c"
+    // const uuid = "b41df80e-4f36-4afa-9428-00939882ff1b"
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid]);
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r']);
+    // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r','-c']); //Force cpu use
 
 
     // 2. game.py - Example of options and thread to run model-to-model battle
@@ -40,7 +42,7 @@ class Server {
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','human_play.py', ["-g", "./data/play_example.json"]);
 
 
-    //await process.run();
+    // await process.run();
   }
 }
 
