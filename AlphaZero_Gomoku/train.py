@@ -80,6 +80,7 @@ class TrainPipeline():
         self.epochs = train_config["hyperparameters"]["epochs"]
         self.eval_rounds = train_config["testparameters"]["eval_rounds"]
         self.model_playout = train_config["testparameters"]["model_playout"]  # num of simulations for each move
+        self.best_win_ratio = train_config["testparameters"]["best_win_ratio"] # Critical when resuming. All previous progress will be lost when not set.
 
         # num of simulations used for the pure mcts, which is used as
         # the opponent to evaluate the trained policy
@@ -93,7 +94,6 @@ class TrainPipeline():
         self.c_puct = 5
         self.play_batch_size = 1
         self.kl_targ = 0.02
-        self.best_win_ratio = 0.0
         
         
         model_file_path = f"../models/{str(self.uuid)}/curr.model"
@@ -266,6 +266,12 @@ class TrainPipeline():
                         self.policy_value_net.save_model(f"../models/"
                                                         f"{self.uuid}/"
                                                         f"best.model")
+                        
+                        train_config_path = self.io_dir + f"train.json"
+                        with open(train_config_path, encoding='utf-8') as f:
+                            train_config = json.loads(f.read())
+                        train_config["testparameters"]["best_win_ratio"]=win_ratio
+                        json.dump(train_config,open(train_config_path, "w",encoding='utf-8'))
                         if (self.best_win_ratio == 1.0 and
                                 self.pure_mcts_playout_num < 5000):
                             self.pure_mcts_playout_num += 1000
