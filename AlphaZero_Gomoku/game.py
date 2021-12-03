@@ -12,6 +12,7 @@ from mcts_alphaZero import MCTSPlayer
 from nn_architecture import PolicyValueNet
 import random
 
+import os
 
 class Board(object):
     """board for the game"""
@@ -165,7 +166,7 @@ class Game(object):
                     print('_'.center(8), end='')
             print('\r\n\r\n', flush = True)
 
-    def start_play(self, player1, player2, start_player=0, is_shown=1):
+    def start_play(self, player1, player2, start_player=0, is_shown=1, journal = None, output_path = None):
         """start a game between two players"""
         if start_player not in (0, 1):
             raise Exception('start_player should be either 0 (player1 first) '
@@ -175,10 +176,16 @@ class Game(object):
         player1.set_player_ind(p1)
         player2.set_player_ind(p2)
         players = {p1: player1, p2: player2}
+        if journal:
+            battle_record = {"starter":int(start_player+1),"moves":[],"winner":""}
         # First Move: Random
-        if start_player==1: # probably change this to detect if it is ai or not
-            first_move = random.sample([14, 15, 20, 21], 1)[0]
+        w = self.board.width
+        h = self.board.height
+        if isinstance(players[start_player+1],MCTSPlayer): # probably change this to detect if it is ai or not
+            first_move = random.sample([w*(h//2)-w//2-1, w*(h//2)-w//2,w*(h//2)-w//2+1, w*(h//2)+w//2-1, w*(h//2)+w//2,w*(h//2)+w//2+1], 1)[0]
             self.board.do_move(first_move)
+            if journal:
+                battle_record["moves"].append(int(first_move))
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
         while True:
@@ -186,6 +193,8 @@ class Game(object):
             player_in_turn = players[current_player]
             move = player_in_turn.get_action(self.board)
             self.board.do_move(move)
+            if journal:
+                battle_record["moves"].append(int(move))
             if is_shown:
                 # Display how random the policy is (eps): 0 is greedy, 1 is pure random
                 print(move//self.board.width, move%self.board.width)
@@ -197,6 +206,10 @@ class Game(object):
                         print("Game end. Winner is", players[winner])
                     else:
                         print("Game end. Tie")
+                if journal:
+                    battle_record["winner"]=int(winner)
+                    journal["battle_records"].append(battle_record)
+                    json.dump(journal,open(output_path,"w"))
                 return winner
 
     def start_self_play(self, player, is_shown=0, temp=1e-3):
@@ -235,12 +248,37 @@ class Game(object):
                         print("Game end. Tie")
                 return winner, zip(states, mcts_probs, winners_z)
 
+def get_PVN_from_uuid(uuid:str,model_option:str="best",force_cpu=False):
+    
+    model_config = f"../models/{uuid}/model.json"
+    with open(model_config, encoding='utf-8') as f:
+        model_config = json.loads(f.read())
+    # params of the board and the game
+    board_width = model_config["board"]["board_width"]
+    board_height = model_config["board"]["board_height"]
+    name = model_config["name"]
+
+    model_file_path = f"../models/{uuid}/{model_option}.model"
+    if os.path.exists(model_file_path):
+        print(f"Loading checkpoint from: {uuid}, {model_option}")
+    else:
+        print(f"{model_option}_model from uuid of {uuid} could not be found")
+        raise
+
+    policy_value_net = PolicyValueNet(board_width, board_height, model_config["nn_type"], model_config["layers"], model_file = model_file_path,force_cpu = force_cpu)
+    mcts_player = MCTSPlayer(policy_value_net.policy_value_fn,
+                                    c_puct=5,
+                                    n_playout=board_width*board_height*17,name=name)
+    return mcts_player
+
 if __name__ == "__main__":
     import argparse
+    import re,datetime
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
     parser.add_argument("-R", "--rounds", type = int, help="How many rounds do you want to play?")
+    parser.add_argument("-c","--cpu", action="store_true",help="Force to run on CPU, without cuda", default=False)
     args = parser.parse_args()
 
     f = open(args.game_config, encoding='utf-8')
@@ -252,18 +290,17 @@ if __name__ == "__main__":
     board = Board(width=width, height=height, n_in_row=n_in_row)
     game = Game(board)
 
-    player1_data = data["player1"]
-    player1_policy = PolicyValueNet(width, height, player1_data["nn_information"], model_file=player1_data["model_path"])
-    player1 = MCTSPlayer(player1_policy.policy_value_fn,
-                                c_puct=5,
-                                n_playout=400, name = "Our Player")  # set larger n_playout for better performance
+    player1_uuid = data["player1"]
+    player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)  # set larger n_playout for better performance
 
-    player2_data = data["player2"]
-    player2_policy = PolicyValueNet(width, height, player2_data["nn_information"], model_file=player2_data["model_path"])
-    player2 = MCTSPlayer(player2_policy.policy_value_fn,
-                                c_puct=5,
-                                n_playout=400, name = "Opponent")
+    player2_uuid = data["player2"]   
+    player2 = get_PVN_from_uuid(player2_uuid,"curr",args.cpu)
     random.seed()
+    timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
+    json_output={"battle_records":[]} #[{"starter":0,"moves":[],"winner":1}]}
+    player1_shorthand = player1_uuid.split("-")[0]
+    player2_shorthand = player2_uuid.split("-")[0]
+    output_path = f"../battle_records/{timestamp}-{player1_shorthand}-{player2_shorthand}.json"
     for ii in range(1,args.rounds+1):
-        game.start_play(player1,player2,random.randrange(2), is_shown = 1)
+        game.start_play(player1,player2,random.randrange(2), is_shown = 1, journal = json_output, output_path=output_path)
         print(f"Round {ii} ended",end = "\n\n")

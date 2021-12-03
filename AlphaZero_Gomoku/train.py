@@ -124,7 +124,7 @@ class TrainPipeline():
         #   ]
         #  }
         self.records = {"start":"","train_progression":[],"win_rates":[],"end":""}
-        json.dump(self.records,open(self.output_json_path))
+        json.dump(self.records,open(self.output_json_path,"w"))
         self.step = 0
 
     def get_equi_data(self, play_data):
@@ -247,17 +247,17 @@ class TrainPipeline():
                 self.collect_selfplay_data(self.play_batch_size)
                 if len(self.data_buffer) > self.batch_size:
                     loss, entropy, kl = self.policy_update(ii)
-                    self.records["train_progression"].append([ii, # epoch
-                                                            f"{time.time()-start:.02f}", # elapsed time
-                                                            f"{loss:.05f}",
-                                                            f"{entropy:.05f}",
-                                                            f"{kl:.05f}"])
+                    self.records["train_progression"].append([int(ii), # epoch
+                                                            float(round(time.time()-start,2)), # elapsed time
+                                                            float(round(loss,5)),
+                                                            float(round(entropy,5)),
+                                                            float(round(kl,5))])
                     json.dump(self.records,open(self.output_json_path,"w"))
                 # check the performance of the current model,
                 # and save the model params
                 if (ii+1) % self.check_freq == 0:
                     win_ratio = self.policy_evaluate(self.eval_rounds)
-                    self.records["win_rates"].append([ii,f"{win_ratio:.02f}"])
+                    self.records["win_rates"].append([ii,float(round(win_ratio,2))])
                     self.policy_value_net.save_model(f"../models/"
                                                     f"{self.uuid}/"
                                                     f"curr.model")
