@@ -32,7 +32,7 @@ Most of the commands should be run at `Server/.` directory.
 By default, the AI code is **NOT** included in the Server.  
 To run the server with a working AI training/battle/playing, use the code below in `Server/.` directory
 ```
-rm -rf ./src/ml/AlphaZero_Gomoku ; sudo cp -r ../AlphaZero_Gomoku/ ./src/ml/AlphaZero_Gomoku
+rm -rf ../AlphaZero_Gomoku/runs ; cp -r ./src/ml/AlphaZero_Gomku/runs/ ../AlphaZero_Gomoku/runs ; rm -rf ./src/ml/AlphaZero_Gomoku ; sudo cp -r ../AlphaZero_Gomoku/ ./src/ml/AlphaZero_Gomoku
 ```
 
 ### Trouble shooting

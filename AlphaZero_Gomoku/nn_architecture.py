@@ -4,7 +4,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from torch_geometric.nn import GCNConv, SGConv, global_mean_pool
+import torch_geometric.nn.conv.message_passing as gnn_parent
+from torch_geometric.nn import GCNConv, SGConv, SAGEConv, ChebConv, GINConv, GATConv, global_mean_pool
 from torch_geometric.data import Data, Batch
 from torch_geometric.loader import DataLoader
 
@@ -21,7 +22,7 @@ def set_learning_rate(optimizer, lr):
 
 
 class NeuralNet(nn.Module):
-    def __init__(self, board_width, board_height, nn_information):
+    def __init__(self, board_width, board_height, nn_type, nn_layers):
         super(NeuralNet, self).__init__()
 
         self.board_width = board_width
@@ -29,15 +30,16 @@ class NeuralNet(nn.Module):
 
         # Consturct Neural Network
         self.layers = nn.ModuleList()
-        self.nn_type = nn_information["nn_type"]
+        self.nn_type = nn_type
         if self.nn_type == "CNN":
             prev_channels = 4
             prev_width = self.board_width
             prev_height = self.board_height
             input_sizes = [(prev_channels, prev_width, prev_height)]
-            for i in range(nn_information['n_layers']):
-                layer_information = nn_information.get(f"layer_{i}")
-                if layer_information["layer_name"] == "Conv":
+            for layer in nn_layers:
+                layer_information = layer
+                layer_type = layer_information["layer_name"]
+                if layer_type == "Conv":
                     channels = layer_information["channels"]
                     kernel_size = layer_information["kernel_size"]
                     stride = layer_information["stride"]
@@ -51,59 +53,65 @@ class NeuralNet(nn.Module):
                     prev_channels = channels
                     prev_width = width
                     prev_height = height
-                elif layer_information["layer_name"] == "BatchNorm":
-                    self.layers.append(nn.BatchNorm2d(input_sizes[-1][0]))        
+                elif layer_type == "BatchNorm":
+                    self.layers.append(nn.BatchNorm2d(input_sizes[-1][0]))
+                elif layer_type == "ReLU":
+                    self.layers.append(nn.ReLU())
+                elif layer_type == "LeakyReLU":
+                    self.layers.append(nn.LeakyReLU())
+                elif layer_type == "Sigmoid":
+                    self.layers.append(nn.Sigmoid())
+                elif layer_type == "Tanh":
+                    self.layers.append(nn.Tanh())
                 else:
                     NotImplementedError()
             self.final_input_size = calculate_input_size(input_sizes[-1])
         elif self.nn_type == "GNN":
             prev_channels = 4
-            for i in range(nn_information['n_layers']):
-                layer_information = nn_information.get(f"layer_{i}")
-                if layer_information["layer_name"] == "GCNConv":
+            for layer in nn_layers:
+                layer_information = layer
+                layer_type = layer_information["layer_name"]
+                if layer_type == "GCNConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GCNConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
-                elif layer_information["layer_name"] == "ChebConv":
+                elif layer_type == "ChebConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(ChebConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
-                elif layer_information["layer_name"] == "SAGEConv":
+                elif layer_type == "SAGEConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(SAGEConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
-                elif layer_information["layer_name"] == "GATConv":
+                elif layer_type == "GATConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GATConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
-                elif layer_information["layer_name"] == "GINConv":
+                elif layer_type == "GINConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GINConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
-                elif layer_information["layer_name"] == "SGConv":
+                elif layer_type == "SGConv":
                     channels = layer_information["channels"]
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(SGConv(prev_channels, channels, bias=bias))
                     prev_channels = channels      
+                elif layer_type == "ReLU":
+                    self.layers.append(nn.ReLU())
+                elif layer_type == "LeakyReLU":
+                    self.layers.append(nn.LeakyReLU())
+                elif layer_type == "Sigmoid":
+                    self.layers.append(nn.Sigmoid())
+                elif layer_type == "Tanh":
+                    self.layers.append(nn.Tanh())
                 else:
                     NotImplementedError()
             self.final_input_size = channels * self.board_width * self.board_height
-        else:
-            NotImplementedError()
-
-        if nn_information["activ_func"] == "ReLU":
-            self.activ_func = nn.ReLU()
-        elif nn_information["activ_func"] == "LeakyReLU":
-            self.activ_func = nn.LeakyReLU()
-        elif nn_information["activ_func"] == "Sigmoid":
-            self.activ_func = nn.Sigmoid()
-        elif nn_information["activ_func"] == "Tanh":
-            self.activ_func = nn.Tanh()
         else:
             NotImplementedError()
         
@@ -119,11 +127,13 @@ class NeuralNet(nn.Module):
         if self.nn_type == "CNN":
             for layer in self.layers:
                 x = layer(x)
-                x = self.activ_func(x)
         else:
             for layer in self.layers:
-                x = layer(x, edge_index)
-                x = self.activ_func(x)
+                if isinstance(layer, gnn_parent.MessagePassing):
+                    x = layer(x, edge_index)
+                else:
+                    x=layer(x) 
+                    
 
         x_act = x.view(-1, self.final_input_size)
         x_act = F.relu(self.act_fc1(x_act))
@@ -136,14 +146,14 @@ class NeuralNet(nn.Module):
 
 
 class PolicyValueNet():
-    def __init__(self, board_width, board_height, nn_information, model_file=None):
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    def __init__(self, board_width, board_height, nn_type, nn_layers, model_file=None, force_cpu = False):
+        self.device = 'cuda' if torch.cuda.is_available() and not force_cpu else 'cpu'
         self.board_width = board_width
         self.board_height = board_height
         self.l2_const = 1e-4  # coef of l2 penalty
         
         # the policy value net module
-        self.policy_value_net = NeuralNet(board_width, board_height, nn_information).to(self.device)
+        self.policy_value_net = NeuralNet(board_width, board_height, nn_type, nn_layers).to(self.device)
         self.nn_type = self.policy_value_net.nn_type
         if self.nn_type == "GNN":
             self.edge_index = self.get_index()

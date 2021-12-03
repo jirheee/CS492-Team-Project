@@ -32,54 +32,70 @@ class Eval_Thread(threading.Thread):
         self.pure_mcts = copy.deepcopy(pure_mcts)
         self.round =round_num
         self.winner_cnt = winner_cnt
+        self.daemon=True
     def run(self):
-        winner = self.game.start_play(self.curr_mcts,
-                                          self.pure_mcts,
-                                          start_player=self.round % 2,
-                                          is_shown=0)
-        with winner_cnt_lock:
-            self.winner_cnt[winner]+=1
+        try:
+            winner = self.game.start_play(self.curr_mcts,
+                                            self.pure_mcts,
+                                            start_player=self.round % 2,
+                                            is_shown=0)
+            with winner_cnt_lock:
+                self.winner_cnt[winner]+=1
+        except KeyboardInterrupt:
+            print(f"Terminating round{self.round}")
 
 from torch.utils.tensorboard import SummaryWriter
 
 class TrainPipeline():
-    def __init__(self, uuid = "0000", resume = False):
+    def __init__(self, uuid = "0000", resume = False, force_cpu = False):
         # load data from json file
         
         self.uuid = uuid
-        data = f"../models/{str(uuid)}/model.json"
-        f = open(data, encoding='utf-8')
-        data = json.loads(f.read())
+        self.io_dir = f"../models/{str(uuid)}/"
+        self.output_json_path = self.io_dir+f"output.json"
+        output_num=0
+        while os.path.exists(self.output_json_path):
+            output_num = output_num+1
+            self.output_json_path = self.io_dir+f"output{output_num}.json"
+        model_config = self.io_dir + f"model.json"
+        train_config = self.io_dir + f"train.json"
+        with open(model_config, encoding='utf-8') as f:
+            model_config = json.loads(f.read())
+        with open(train_config, encoding='utf-8') as f:
+            train_config = json.loads(f.read())
 
         # params of the board and the game
-        self.board_width = data["board"]["board_width"]
-        self.board_height = data["board"]["board_height"]
-        self.n_in_row = data["board"]["n_in_row"]
+        self.board_width = model_config["board"]["board_width"]
+        self.board_height = model_config["board"]["board_height"]
+        self.n_in_row = model_config["board"]["n_in_row"]
         self.board = Board(width=self.board_width,
                            height=self.board_height,
                            n_in_row=self.n_in_row)
         self.game = Game(self.board)
 
         # training params
-        self.lr = data["hyperparameters"]["lr"]
-        self.buffer_size = data["hyperparameters"]["buffer_size"]
-        self.batch_size = data["hyperparameters"]["batch_size"]
-        self.epochs = data["hyperparameters"]["epochs"]
+        self.lr = train_config["hyperparameters"]["lr"]
+        self.buffer_size = train_config["hyperparameters"]["buffer_size"]
+        self.batch_size = train_config["hyperparameters"]["batch_size"]
+        self.epochs = train_config["hyperparameters"]["epochs"]
+        self.eval_rounds = train_config["testparameters"]["eval_rounds"]
+        self.model_playout = train_config["testparameters"]["model_playout"]  # num of simulations for each move
+
+        # num of simulations used for the pure mcts, which is used as
+        # the opponent to evaluate the trained policy
+        self.pure_mcts_playout_num = train_config["testparameters"]["mcts_playout"]
+        self.check_freq = train_config["testparameters"]["check_freq"]
+        
         self.data_buffer = deque(maxlen=self.buffer_size)
         
         self.lr_multiplier = 1.0  # adaptively adjust the learning rate based on KL
         self.temp = 1.0  # the temperature param
-        self.n_playout = 400  # num of simulations for each move
         self.c_puct = 5
         self.play_batch_size = 1
         self.kl_targ = 0.02
-        self.check_freq = 100
         self.best_win_ratio = 0.0
-        self.eval_rounds = 25
         
-        # num of simulations used for the pure mcts, which is used as
-        # the opponent to evaluate the trained policy
-        self.pure_mcts_playout_num = 1000
+        
         model_file_path = f"../models/{str(self.uuid)}/curr.model"
         if resume and os.path.exists(model_file_path):
             print(f"Loading checkpoint from: {str(self.uuid)}")
@@ -89,13 +105,26 @@ class TrainPipeline():
                 print("Overriding "+model_file_path, end = "")
             model_file_path = None
             print(flush=True)
-        self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, data["nn_information"], model_file = model_file_path)
+        if force_cpu:
+            print("Forced to use CPU only")
+
+        self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, model_config["nn_type"], model_config["layers"], model_file = model_file_path,force_cpu=force_cpu)
         self.mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn,
                                       c_puct=self.c_puct,
-                                      n_playout=self.n_playout,
+                                      n_playout=self.model_playout,
                                       is_selfplay=1)
 
         self.writer = SummaryWriter()
+        # {"train_progression":[
+        #       [0epoch, 1time, 2loss, 3entropy, 4D_kl],
+        #        ... ,
+        #   ],
+        #  "win_rates":[
+        #       [epoch, win_rate]
+        #   ]
+        #  }
+        self.records = {"start":"","train_progression":[],"win_rates":[],"end":""}
+        json.dump(self.records,open(self.output_json_path))
         self.step = 0
 
     def get_equi_data(self, play_data):
@@ -175,12 +204,11 @@ class TrainPipeline():
         #                 entropy,
         #                 explained_var_old,
         #                 explained_var_new))
-        print(f"epoch {epoch:05d} | loss: {loss}", end = "", flush=True)
         self.writer.add_scalar("KL Divergence", kl, self.step)
         self.writer.add_scalar("Loss", loss, self.step)
         self.writer.add_scalar("Entropy", entropy, self.step)
         self.step += 1
-        return loss, entropy
+        return loss, entropy, kl
 
     def policy_evaluate(self, n_games=10):
         """
@@ -189,7 +217,7 @@ class TrainPipeline():
         """
         current_mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn,
                                          c_puct=self.c_puct,
-                                         n_playout=self.n_playout)
+                                         n_playout=self.model_playout)
         pure_mcts_player = MCTS_Pure(c_puct=5,
                                      n_playout=self.pure_mcts_playout_num)
         win_cnt = defaultdict(int)
@@ -199,7 +227,11 @@ class TrainPipeline():
             threads.append(new_thread)
             new_thread.start()
         for t in threads:
-            t.join()
+            try:
+                t.join()
+            except KeyboardInterrupt:
+                print("Ignoring a thread")
+                raise KeyboardInterrupt
         win_ratio = 1.0*(win_cnt[1] + 0.5*win_cnt[-1]) / n_games
         print("num_playouts:{}, win: {}, lose: {}, tie:{}".format(
                 n_games, win_cnt[1], win_cnt[2], win_cnt[-1]))
@@ -209,26 +241,28 @@ class TrainPipeline():
         """run the training pipeline"""
         try:        
             timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
+            self.records["start"]=timestamp
             start = time.time()
-            print(self.uuid, timestamp)
             for ii in range(self.epochs):
-                print(f"epoch {ii:05d} | elapsed time: {time.time()-start:.2f}",end = "",flush=True)
-
                 self.collect_selfplay_data(self.play_batch_size)
                 if len(self.data_buffer) > self.batch_size:
-                    loss, entropy = self.policy_update(ii)
+                    loss, entropy, kl = self.policy_update(ii)
+                    self.records["train_progression"].append([ii, # epoch
+                                                            f"{time.time()-start:.02f}", # elapsed time
+                                                            f"{loss:.05f}",
+                                                            f"{entropy:.05f}",
+                                                            f"{kl:.05f}"])
+                    json.dump(self.records,open(self.output_json_path,"w"))
                 # check the performance of the current model,
                 # and save the model params
                 if (ii+1) % self.check_freq == 0:
-                    # print("\ncurrent self-play batch: {}".format(i+1))
                     win_ratio = self.policy_evaluate(self.eval_rounds)
+                    self.records["win_rates"].append([ii,f"{win_ratio:.02f}"])
                     self.policy_value_net.save_model(f"../models/"
                                                     f"{self.uuid}/"
                                                     f"curr.model")
                     if win_ratio > self.best_win_ratio:
-                        #print("New best policy!!!!!!!!")
                         self.best_win_ratio = win_ratio
-                        # update the best_policy
                         self.policy_value_net.save_model(f"../models/"
                                                         f"{self.uuid}/"
                                                         f"best.model")
@@ -236,6 +270,7 @@ class TrainPipeline():
                                 self.pure_mcts_playout_num < 5000):
                             self.pure_mcts_playout_num += 1000
                             self.best_win_ratio = 0.0
+                json.dump(self.records,open(self.output_json_path,"w"))
             self.policy_evaluate(self.eval_rounds)
             # Save at the end of training             
             self.policy_value_net.save_model(f"../models/"
@@ -244,17 +279,26 @@ class TrainPipeline():
             self.writer.close()
         except KeyboardInterrupt:
             print('\n\rquit')
+            # Save at the end of training             
+            self.policy_value_net.save_model(f"../models/"
+                                            f"{self.uuid}/"
+                                            f"curr.model")
         timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
-        print("Train finished" f"{self.uuid} {timestamp}")
+        self.records["end"] = timestamp
+        json.dump(self.records,open(self.output_json_path,"w"))
+
             
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-u","--uuid", help="UUID is used for reading model parameters and saving, loading models")
     parser.add_argument("-r","--resume", action = "store_true" , help="Resume from saved checkpoint", default=False)
+    parser.add_argument("-c","--cpu", action="store_true",help="Force to run on CPU, without cuda", default=False)
     args = parser.parse_args()
     winner_cnt_lock = threading.Lock()
 
-    uuid=args.uuid
-    training_pipeline = TrainPipeline(uuid, args.resume)
+    test_uuid = args.uuid
+    test_resume = args.resume
+    test_force_cpu = args.cpu
+    training_pipeline = TrainPipeline(test_uuid, test_resume, test_force_cpu)
     training_pipeline.run()
