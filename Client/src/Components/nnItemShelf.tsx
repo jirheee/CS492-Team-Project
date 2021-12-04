@@ -13,7 +13,7 @@ interface NNItemShelfProps {
 }
 
 const NNItemShelf = ({ nnType, onClick }: NNItemShelfProps) => {
-  const trainableBlockNumber = nnType === NNType.CNN ? 2 : 5;
+  const trainableBlockNumber = nnType === NNType.CNN ? 2 : 4;
   const activationBlockNumber = 4;
   return (
     <Flex>

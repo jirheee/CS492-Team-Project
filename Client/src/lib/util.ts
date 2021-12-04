@@ -17,8 +17,6 @@ const getBlockColor = (layerType: LayerType | ActivationFunction) => {
       return 'orange.50';
     case LayerType.GCNConv:
       return 'orange.100';
-    case LayerType.GINConv:
-      return 'orange.200';
     case LayerType.SAGEConv:
       return 'orange.300';
     case LayerType.SGConv:
@@ -72,7 +70,6 @@ const getGnnAvailableLayerTypes = () =>
   [
     LayerType.GATConv,
     LayerType.GCNConv,
-    LayerType.GINConv,
     LayerType.SAGEConv,
     LayerType.SGConv
   ].map(t => createLayer(t));

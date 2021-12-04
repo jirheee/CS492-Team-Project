@@ -17,7 +17,6 @@ export enum LayerType {
   GCNConv = 'GCNConv',
   SGConv = 'SGConv',
   GATConv = 'GATConv',
-  GINConv = 'GINConv',
   SAGEConv = 'SAGEConv'
 }
 

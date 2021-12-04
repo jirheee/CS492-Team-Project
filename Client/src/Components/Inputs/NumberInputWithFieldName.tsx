@@ -12,17 +12,28 @@ interface NumberInputProps {
   label: string;
   defaultValue: number;
   min?: number;
+  max?: number;
+  step?: number;
 }
 
 const NumberInputWithFieldname = ({
   label,
   id,
   defaultValue,
-  min
+  min,
+  max,
+  step
 }: NumberInputProps) => {
   return (
     <InputWithFieldName label={label} id={id}>
-      <NumberInput id={id} size="sm" defaultValue={defaultValue} min={min}>
+      <NumberInput
+        id={id}
+        size="sm"
+        defaultValue={defaultValue}
+        min={min}
+        step={step}
+        max={max}
+      >
         <NumberInputField />
         <NumberInputStepper>
           <NumberIncrementStepper />
