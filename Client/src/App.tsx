@@ -23,9 +23,7 @@ export const App = () => {
   const [text, setText] = useState('');
 
   useEffect(() => {
-    console.log('Rendered');
     Request.get('/status').then(data => {
-      console.log(data.data.data);
       setText(data.data.data);
     });
   }, []);
@@ -35,7 +33,6 @@ export const App = () => {
 
   useEffect(() => {
     socket?.on('response', (data: Record<string, string>) => {
-      console.log(data);
       setSocketText(data['time']);
     });
   }, [socket, connected]);
@@ -43,10 +40,6 @@ export const App = () => {
   return (
     <ChakraProvider theme={theme}>
       {/* <ColorModeSwitcher /> */}
-      {/* <Heading>{`http response: ${text}`}</Heading>
-      <Heading>{`socket response: ${socketResponseText} socket connected: ${
-        connected ? 'connected' : 'disconnected'
-      }`}</Heading> */}
       <Box w="100vw" h="100vh">
         <Router>
           <Switch>

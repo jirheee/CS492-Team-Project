@@ -8,12 +8,19 @@ interface NNBoardProps {
   setLayers?: React.Dispatch<
     React.SetStateAction<(ConvLayer | GraphConvLayer | Layer)[]>
   >;
+  isModifiable?: boolean;
+  h: string;
 }
 
-const NNBoard = ({ layers, setLayers }: NNBoardProps) => {
+const NNBoard = ({
+  layers,
+  setLayers,
+  h,
+  isModifiable = true
+}: NNBoardProps) => {
   return (
     <Flex
-      h="full"
+      h={h}
       minH="400px"
       w="full"
       border="solid"
@@ -28,23 +35,27 @@ const NNBoard = ({ layers, setLayers }: NNBoardProps) => {
           layerProps.layer_name,
           layerProps,
           i,
-          undefined,
-          () => {
-            setLayers &&
-              setLayers(layerArr => {
-                const newLayerArr = [...layerArr];
-                newLayerArr.splice(i, 1);
-                return newLayerArr;
-              });
-          },
-          newLayer => () => {
-            setLayers &&
-              setLayers(layerArr => {
-                const newLayerArr = [...layerArr];
-                newLayerArr.splice(i, 1, newLayer);
-                return newLayerArr;
-              });
-          }
+          isModifiable ? undefined : () => {},
+          isModifiable
+            ? () => {
+                setLayers &&
+                  setLayers(layerArr => {
+                    const newLayerArr = [...layerArr];
+                    newLayerArr.splice(i, 1);
+                    return newLayerArr;
+                  });
+              }
+            : undefined,
+          isModifiable
+            ? newLayer => () => {
+                setLayers &&
+                  setLayers(layerArr => {
+                    const newLayerArr = [...layerArr];
+                    newLayerArr.splice(i, 1, newLayer);
+                    return newLayerArr;
+                  });
+              }
+            : undefined
         )
       )}
     </Flex>

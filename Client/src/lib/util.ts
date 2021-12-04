@@ -1,4 +1,5 @@
 import {
+  ActivationFunction,
   BiasInfo,
   ConvLayer,
   GraphConvLayer,
@@ -6,7 +7,7 @@ import {
   LayerType
 } from '../model/types';
 
-const getBlockColor = (layerType: LayerType) => {
+const getBlockColor = (layerType: LayerType | ActivationFunction) => {
   switch (layerType) {
     case LayerType.BatchNorm:
       return 'yellow.100';
@@ -16,12 +17,12 @@ const getBlockColor = (layerType: LayerType) => {
       return 'orange.50';
     case LayerType.GCNConv:
       return 'orange.100';
-    case LayerType.GINConv:
-      return 'orange.200';
     case LayerType.SAGEConv:
       return 'orange.300';
     case LayerType.SGConv:
       return 'orange.400';
+    default:
+      return 'red.100';
   }
 };
 
@@ -29,9 +30,21 @@ const isInt = value => {
   return /^\+?(0|[1-9]\d*)$/.test(value);
 };
 
+const isActivationFunction = (layerType: LayerType | ActivationFunction) => {
+  return (
+    layerType === ActivationFunction.LeakyReLU ||
+    layerType === ActivationFunction.ReLU ||
+    layerType === ActivationFunction.Tanh ||
+    layerType === ActivationFunction.Sigmoid
+  );
+};
+
 const createLayer = (
-  layerType: LayerType
+  layerType: LayerType | ActivationFunction
 ): Layer | GraphConvLayer | ConvLayer => {
+  if (isActivationFunction(layerType)) {
+    return { layer_name: layerType };
+  }
   switch (layerType) {
     case LayerType.BatchNorm:
       return { layer_name: LayerType.BatchNorm };
@@ -49,18 +62,28 @@ const createLayer = (
   }
 };
 
+const createActivationLayer = (activationType: ActivationFunction) => {
+  return { layer_name: activationType };
+};
+
 const getGnnAvailableLayerTypes = () =>
   [
-    LayerType.BatchNorm,
     LayerType.GATConv,
     LayerType.GCNConv,
-    LayerType.GINConv,
     LayerType.SAGEConv,
     LayerType.SGConv
   ].map(t => createLayer(t));
 
 const getCnnAvailableLayerTypes = () =>
   [LayerType.BatchNorm, LayerType.Conv].map(t => createLayer(t));
+
+const getActivationFunctions = () =>
+  [
+    ActivationFunction.ReLU,
+    ActivationFunction.LeakyReLU,
+    ActivationFunction.Sigmoid,
+    ActivationFunction.Tanh
+  ].map(t => createActivationLayer(t));
 
 const capitalizeFirstChar = (str: string) => {
   return str.charAt(0).toLocaleUpperCase() + str.slice(1);
@@ -107,5 +130,7 @@ export {
   snakeCaseToPascalCase,
   getMinimunvalueForField,
   lowercaseFirstChar,
-  pascalCaseToSnakeCase
+  pascalCaseToSnakeCase,
+  getActivationFunctions,
+  isActivationFunction
 };

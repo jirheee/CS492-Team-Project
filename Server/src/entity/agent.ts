@@ -5,6 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn
 } from 'typeorm';
+import { TrainStatus } from '../types/nn';
 
 @Entity()
 export default class Agent extends BaseEntity {
@@ -16,4 +17,7 @@ export default class Agent extends BaseEntity {
 
   @Column()
   public name: string;
+
+  @Column({ default: TrainStatus.NOT_TRAINED })
+  public trainStatus: TrainStatus;
 }

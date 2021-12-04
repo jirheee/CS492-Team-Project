@@ -17,7 +17,6 @@ export enum LayerType {
   GCNConv = 'GCNConv',
   SGConv = 'SGConv',
   GATConv = 'GATConv',
-  GINConv = 'GINConv',
   SAGEConv = 'SAGEConv'
 }
 
@@ -39,7 +38,7 @@ export enum BiasInfo {
 }
 
 export interface Layer {
-  layer_name: LayerType;
+  layer_name: LayerType | ActivationFunction;
 }
 
 export interface GraphConvLayer extends Layer {

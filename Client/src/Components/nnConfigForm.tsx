@@ -7,7 +7,7 @@ import {
   Input,
   Button
 } from '@chakra-ui/react';
-import { ActivationFunction, NNType } from '../model/types';
+import { NNType } from '../model/types';
 import { isInt } from '../lib/util';
 
 interface NNConfigFormProps {
@@ -66,23 +66,6 @@ const NNConfigForm = ({
       <FormControl isRequired isInvalid={isInvalidNinRow}>
         <FormLabel>N in Row</FormLabel>
         <Input defaultValue={4} onChange={validateNinRow} />
-      </FormControl>
-      <FormControl isRequired>
-        <FormLabel>Activation Function</FormLabel>
-        <Select>
-          <option value={ActivationFunction.ReLU}>
-            {ActivationFunction.ReLU}
-          </option>
-          <option value={ActivationFunction.LeakyReLU}>
-            {ActivationFunction.LeakyReLU}
-          </option>
-          <option value={ActivationFunction.Sigmoid}>
-            {ActivationFunction.Sigmoid}
-          </option>
-          <option value={ActivationFunction.Tanh}>
-            {ActivationFunction.Tanh}
-          </option>
-        </Select>
       </FormControl>
       <Button mt={4} colorScheme="teal" type="submit">
         Create Agent
