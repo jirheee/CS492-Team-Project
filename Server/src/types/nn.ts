@@ -13,15 +13,18 @@ export interface Layer {
     | 'GCNConv'
     | 'SGConv'
     | 'GATConv'
-    | 'GINConv'
-    | 'SAGEConv';
+    | 'SAGEConv'
+    | 'ReLU'
+    | 'Sigmoid'
+    | 'Tanh'
+    | 'LeakyReLU';
 }
 
 export interface Model {
+  name: string;
   board: Board;
   nn_type: 'CNN' | 'GNN';
   layers: Required<Layer>[];
-  activ_func: 'ReLU' | 'Sigmoid' | 'Tanh' | 'LeakyReLU';
 }
 
 export interface HyperParameters {
@@ -29,4 +32,14 @@ export interface HyperParameters {
   buffer_size: number;
   batch_size: number;
   epochs: number;
+}
+
+export enum TrainStatus {
+  NOT_TRAINED = 'Not Trained',
+  TRAINING = 'Training',
+  TRAIN_FINISHED = 'Train Finished'
+}
+export interface TrainResponse {
+  hyperparameters?: HyperParameters;
+  trainStatus: TrainStatus;
 }

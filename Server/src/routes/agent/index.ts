@@ -1,20 +1,22 @@
 import { Router } from 'express';
 import Agent from '../../entity/agent';
-import { AgentUUID, HyperParameters, Model } from '../../types/nn';
+import {
+  AgentUUID,
+  HyperParameters,
+  Model,
+  TrainResponse,
+  TrainStatus
+} from '../../types/nn';
 import {
   getAgentModel,
   saveModelJson,
-  isValidModel,
-  isValidHyperParameter
+  isValidHyperParameter,
+  getAgentTrainInfo,
+  saveTrainInfo
 } from './logic';
 
-interface CreateModelInterface {
-  name: string;
-  model: Model;
-}
-
 interface TrainModelInterface {
-  agentUUID: AgentUUID;
+  agentUuid: AgentUUID;
   hyperparameters: HyperParameters;
 }
 
@@ -24,17 +26,20 @@ export default (router: Router) => {
 
   agentRouter.post('/create', async (req, res) => {
     try {
-      const { name, model }: CreateModelInterface = req.body;
-      if (!isValidModel(model)) {
-        throw Error('Invalid Model Request');
-      }
+      const model: Model = req.body;
 
       const newAgent = new Agent();
-      newAgent.name = name;
+      newAgent.name = model.name;
       const agent = await newAgent.save();
-      const modelPath = saveModelJson(agent.uuid, model);
+      const modelPath = await saveModelJson(agent.uuid, model);
 
-      res.json({ model, name, modelPath, status: 200 });
+      res.json({
+        model,
+        name: model.name,
+        modelPath,
+        uuid: agent.uuid,
+        status: 200
+      });
     } catch (e) {
       console.error(e);
     }
@@ -42,19 +47,33 @@ export default (router: Router) => {
 
   agentRouter.post('/train', async (req, res) => {
     try {
-      const { agentUUID, hyperparameters }: TrainModelInterface = req.body;
+      const { hyperparameters, agentUuid }: TrainModelInterface = req.body;
       if (!isValidHyperParameter(hyperparameters)) {
         throw new Error('Invalid HyperParameter');
       }
-      const agent = await Agent.findOne(agentUUID);
+      const agent = await Agent.findOne(agentUuid);
       if (agent === undefined) {
         throw new Error('Invalid Agent UUID');
       }
+      if (agent.trainStatus !== TrainStatus.NOT_TRAINED) {
+        throw new Error(`TrainStatus ${agent.trainStatus}`);
+      }
 
-      const model = await getAgentModel(agentUUID);
+      agent.trainStatus = TrainStatus.TRAINING;
+      await agent.save();
+
+      await saveTrainInfo(hyperparameters, agentUuid);
+      console.log(hyperparameters, agentUuid);
+
+      const trainInfo: TrainResponse = {
+        hyperparameters,
+        trainStatus: agent.trainStatus
+      };
+
+      const model = await getAgentModel(agentUuid);
       // TODO: Start Training
 
-      res.json({ model, hyperparameters, agentUUID, statue: 200 });
+      res.json({ model, trainInfo, status: 200 });
     } catch (e) {
       console.error(e);
     }
@@ -69,7 +88,16 @@ export default (router: Router) => {
         throw new Error('Invalid Agent UUID');
       }
 
-      throw new Error('not implemented');
+      const model = await getAgentModel(uuid);
+      const hyperparameters = await getAgentTrainInfo(uuid);
+      const trainInfo: TrainResponse = {
+        hyperparameters,
+        trainStatus: agent.trainStatus
+      };
+
+      console.log(trainInfo);
+
+      res.json({ model, trainInfo, status: 200 });
     } catch (e) {
       console.error(e);
     }

@@ -1,0 +1,52 @@
+{
+  "name": "HIHI",
+  "board": {
+    "board_width": 6,
+    "board_height": 6,
+    "n_in_row": 4
+  },
+  "nn_type": "CNN",
+  "layers": [
+    {
+      "layer_name": "Conv",
+      "channels": 1,
+      "kernel_size": 1,
+      "stride": 1,
+      "padding": 1,
+      "bias": "True"
+    },
+    {
+      "layer_name": "Conv",
+      "channels": 1,
+      "kernel_size": 1,
+      "stride": 1,
+      "padding": 1,
+      "bias": "True"
+    },
+    {
+      "layer_name": "Conv",
+      "channels": 1,
+      "kernel_size": 1,
+      "stride": 1,
+      "padding": 1,
+      "bias": "True"
+    },
+    {
+      "layer_name": "Conv",
+      "channels": 1,
+      "kernel_size": 1,
+      "stride": 1,
+      "padding": 1,
+      "bias": "True"
+    },
+    {
+      "layer_name": "BatchNorm"
+    },
+    {
+      "layer_name": "BatchNorm"
+    },
+    {
+      "layer_name": "ReLU"
+    }
+  ]
+}

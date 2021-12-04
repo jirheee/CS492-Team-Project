@@ -1,10 +1,13 @@
 import { readFile, writeFile, mkdir } from 'fs';
-import { AgentUUID, Model } from '../../types/nn';
+import { AgentUUID, HyperParameters, Model } from '../../types/nn';
 
 const getAgentDir = (uuid: AgentUUID) => `src/ml/models/${uuid}`;
 
 const getAgentModelPath = (uuid: AgentUUID) =>
   `${getAgentDir(uuid)}/model.json`;
+
+const getAgentTrainInfoPath = (uuid: AgentUUID) =>
+  `${getAgentDir(uuid)}/train.json`;
 
 const getAgentModel = (uuid: AgentUUID): Promise<Model> => {
   const modelPath = getAgentModelPath(uuid);
@@ -22,9 +25,35 @@ const saveModelJson = (uuid: AgentUUID, model: Model): Promise<string> => {
     const agentDir = getAgentDir(uuid);
     const modelPath = getAgentModelPath(uuid);
     mkdir(agentDir, () => {
-      writeFile(modelPath, JSON.stringify(model), () => {
+      writeFile(modelPath, JSON.stringify(model, null, 2), () => {
         resolve(modelPath);
       });
+    });
+  });
+};
+
+const getAgentTrainInfo = (uuid: string): Promise<HyperParameters> => {
+  return new Promise(resolve => {
+    const agentTrainInfoPath = getAgentTrainInfoPath(uuid);
+    readFile(agentTrainInfoPath, 'utf-8', (err, data) => {
+      if (err) {
+        resolve({ lr: NaN, batch_size: NaN, buffer_size: NaN, epochs: NaN });
+      } else {
+        const hyperparameters: HyperParameters = JSON.parse(data);
+        resolve(hyperparameters);
+      }
+    });
+  });
+};
+
+const saveTrainInfo = (
+  hyperparameters: HyperParameters,
+  uuid: string
+): Promise<HyperParameters> => {
+  return new Promise(resolve => {
+    const trainInfoPath = getAgentTrainInfoPath(uuid);
+    writeFile(trainInfoPath, JSON.stringify(hyperparameters, null, 2), () => {
+      resolve(hyperparameters);
     });
   });
 };
@@ -64,5 +93,7 @@ export {
   getAgentModel,
   saveModelJson,
   isValidModel,
-  isValidHyperParameter
+  isValidHyperParameter,
+  getAgentTrainInfo,
+  saveTrainInfo
 };

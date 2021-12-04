@@ -19,6 +19,8 @@ module.exports = {
     'prettier/prettier': 'error',
     'arrow-body-style': 'off',
     'prefer-arrow-callback': 'off',
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': ['error'],
     'comma-dangle': ['error', 'never'],
     'import/extensions': ['off'],
     'import/no-unresolved': 'error'
