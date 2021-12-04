@@ -17,8 +17,8 @@ class PythonSpawner {
 
   public run() {
     return new Promise((resolve, reject) => {
-      var parameters = [this.file].concat(this.options)
-      this.process = spawn('python3', parameters, {cwd: this.path});
+      const parameters = [this.file].concat(this.options);
+      this.process = spawn('python3', parameters, { cwd: this.path });
 
       console.log('spawned process');
       console.log(this.process.spawnfile);
