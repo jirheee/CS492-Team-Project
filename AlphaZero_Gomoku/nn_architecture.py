@@ -44,10 +44,10 @@ class NeuralNet(nn.Module):
                 layer_information = layer
                 layer_type = layer_information["layer_name"]
                 if layer_type == "Conv":
-                    channels = layer_information["channels"]
-                    kernel_size = layer_information["kernel_size"]
-                    stride = layer_information["stride"]
-                    padding = layer_information["padding"]
+                    channels = int(layer_information["channels"])
+                    kernel_size = int(layer_information["kernel_size"])
+                    stride = int(layer_information["stride"])
+                    padding = int(layer_information["padding"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(nn.Conv2d(prev_channels, channels,
                                                 kernel_size=kernel_size, stride=stride, padding=padding, bias=bias))
@@ -76,32 +76,32 @@ class NeuralNet(nn.Module):
                 layer_information = layer
                 layer_type = layer_information["layer_name"]
                 if layer_type == "GCNConv":
-                    channels = layer_information["channels"]
+                    channels = int(layer_information["channels"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GCNConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
                 elif layer_type == "ChebConv":
-                    channels = layer_information["channels"]
+                    channels = int(layer_information["channels"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(ChebConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
                 elif layer_type == "SAGEConv":
-                    channels = layer_information["channels"]
+                    channels = int(layer_information["channels"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(SAGEConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
                 elif layer_type == "GATConv":
-                    channels = layer_information["channels"]
+                    channels = int(layer_information["channels"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GATConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
                 elif layer_type == "GINConv":
-                    channels = layer_information["channels"]
+                    channels = int(layer_information["channels"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(GINConv(prev_channels, channels, bias=bias))
                     prev_channels = channels
                 elif layer_type == "SGConv":
-                    channels = layer_information["channels"]
+                    channels = int(layer_information["channels"])
                     bias = True if layer_information['bias'] == "True" else False
                     self.layers.append(SGConv(prev_channels, channels, bias=bias))
                     prev_channels = channels      

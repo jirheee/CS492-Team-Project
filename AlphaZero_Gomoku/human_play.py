@@ -66,7 +66,7 @@ def run(data,force_cpu = False):
         random.seed();start_player = random.randrange(2)
 
         #start_player = 1
-        game.start_play(human, player1, start_player=start_player, is_shown=1)
+        game.start_play(human, player1, start_player=start_player, is_shown=0)
     except KeyboardInterrupt:
         print('\n\rquit')
 

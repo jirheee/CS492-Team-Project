@@ -1,5 +1,5 @@
 import { readFile, writeFile, mkdir } from 'fs';
-import { AgentUUID, HyperParameters, Model } from '../../types/nn';
+import { AgentUUID, HyperParameters, Model, TrainHistory } from '../../types/nn';
 
 const getAgentDir = (uuid: AgentUUID) => `src/ml/models/${uuid}`;
 
@@ -8,6 +8,10 @@ const getAgentModelPath = (uuid: AgentUUID) =>
 
 const getAgentTrainInfoPath = (uuid: AgentUUID) =>
   `${getAgentDir(uuid)}/train.json`;
+
+const getAgentTrainHistoryPath = (uuid: AgentUUID) =>
+  `${getAgentDir(uuid)}/output.json`;
+  
 
 const getAgentModel = (uuid: AgentUUID): Promise<Model> => {
   const modelPath = getAgentModelPath(uuid);
@@ -41,6 +45,20 @@ const getAgentTrainInfo = (uuid: string): Promise<HyperParameters> => {
       } else {
         const hyperparameters: HyperParameters = JSON.parse(data);
         resolve(hyperparameters);
+      }
+    });
+  });
+};
+
+const getAgentTrainHistory = (uuid: string): Promise<TrainHistory> => {
+  return new Promise(resolve => {
+    const agentTrainHistoryPath = getAgentTrainHistoryPath(uuid);
+    readFile(agentTrainHistoryPath, 'utf-8', (err, data) => {
+      if (err) {
+        resolve({ start: "", train_progression: [], win_rates: [], end: "" });
+      } else {
+        const trainhistory: TrainHistory = JSON.parse(data);
+        resolve(trainhistory);
       }
     });
   });
@@ -95,5 +113,6 @@ export {
   isValidModel,
   isValidHyperParameter,
   getAgentTrainInfo,
-  saveTrainInfo
+  saveTrainInfo,
+  getAgentTrainHistory
 };

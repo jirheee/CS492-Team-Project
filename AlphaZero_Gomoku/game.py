@@ -11,6 +11,7 @@ from mcts_alphaZero import MCTSPlayer
 from nn_architecture import get_PVN_from_uuid
 import random
 
+import os
 
 class Board(object):
     """board for the game"""
@@ -175,15 +176,17 @@ class Game(object):
         player2.set_player_ind(p2)
         players = {p1: player1, p2: player2}
         if journal:
-            battle_record = {"starter":int(start_player+1),"moves":[],"winner":""}
+            # initiallize record
+            battle_record = {"starter":int(self.board.get_current_player()),"moves":[],"winner":""}
         # First Move: Random
         w = self.board.width
         h = self.board.height
-        if isinstance(players[start_player+1],MCTSPlayer): # probably change this to detect if it is ai or not
+        if isinstance(players[self.board.get_current_player()],MCTSPlayer): # probably change this to detect if it is ai or not
             first_move = random.sample([w*(h//2)-w//2-1, w*(h//2)-w//2,w*(h//2)-w//2+1, w*(h//2)+w//2-1, w*(h//2)+w//2,w*(h//2)+w//2+1], 1)[0]
             self.board.do_move(first_move)
             if journal:
                 battle_record["moves"].append(int(first_move))
+                print(f"moves: [{start_player+1}, {first_move}]")
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
         while True:
@@ -193,21 +196,23 @@ class Game(object):
             self.board.do_move(move)
             if journal:
                 battle_record["moves"].append((int(move//w), int(move%w)))
+                print(f"moves: [{self.board.get_current_player()}, {move}]")
             if is_shown:
                 # Display how random the policy is (eps): 0 is greedy, 1 is pure random
                 print(move//self.board.width, move%self.board.width)
                 self.graphic(self.board, player1.player, player2.player)
             end, winner = self.board.game_end()
             if end:
+                if journal:
+                    battle_record["winner"]=int(winner)
+                    journal["battle_records"].append(battle_record)
+                    print(f"winner: {self.board.get_current_player()}")
+                    json.dump(journal,open(output_path,"w"))
                 if is_shown:
                     if winner != -1:
                         print("Game end. Winner is", players[winner])
                     else:
                         print("Game end. Tie")
-                if journal:
-                    battle_record["winner"]=int(winner)
-                    journal["battle_records"].append(battle_record)
-                    json.dump(journal,open(output_path,"w"))
                 return winner
 
     def start_self_play(self, player, is_shown=0, temp=1e-3):
@@ -278,6 +283,8 @@ if __name__ == "__main__":
     player1_shorthand = player1_uuid.split("-")[0]
     player2_shorthand = player2_uuid.split("-")[0]
     output_path = f"../battle_records/{timestamp}-{player1_shorthand}-{player2_shorthand}.json"
+    if os.path.isdir("../battle_records"):
+        os.mkdir("../battle_records")
     for ii in range(1,args.rounds+1):
-        game.start_play(player1,player2,random.randrange(2), is_shown = 1, journal = json_output, output_path=output_path)
-        print(f"Round {ii} ended",end = "\n\n")
+        game.start_play(player1,player2,random.randrange(2), is_shown = 0, journal = json_output, output_path=output_path)
+        #print(f"Round {ii} ended",end = "\n\n")
