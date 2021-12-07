@@ -32,14 +32,18 @@ class Server {
     // 2. game.py - Example of options and thread to run model-to-model battle
     // For more information of the configuration, look in battle_example.json
     // .json file may be subjected for change
-    // var game_options = ["-g", "./data/battle_example.json"]
-    // var game_options = ["-g", "./data/battle_example.json", "-R", "10"]
-    // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','game.py', game_options);
+    const gameOptions = ['-g', '../battle/battle_example.json', '-R', '1'];
+    // var game_options = ['-g', './data/battle_example.json', '-R', '10'];
+    const process = new PythonSpawner(
+      './src/ml/AlphaZero_Gomoku',
+      'game.py',
+      gameOptions
+    );
 
     // 3. human_play.py - Example of options and thread to play with the model
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','human_play.py', ["-g", "./data/play_example.json"]);
 
-    // await process.run();
+    await process.run().catch(e => console.log(e));
   }
 }
 
