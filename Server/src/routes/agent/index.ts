@@ -17,6 +17,7 @@ import {
 } from './logic';
 
 import PythonSpawner from '../../ml/pythonSpawner';
+import { ProcessType } from '../../types';
 
 interface TrainModelInterface {
   agentUuid: AgentUUID;
@@ -75,9 +76,18 @@ export default (router: Router) => {
 
       const model = await getAgentModel(agentUuid);
       // TODO: Start Training
-      const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',agentUuid,'-r']);
+      const process = new PythonSpawner(
+        './src/ml/AlphaZero_Gomoku',
+        'train.py',
+        ['-u', agentUuid, '-r'],
+        {
+          onData: data => {
+            console.log(data);
+          }
+        },
+        ProcessType.Train
+      );
       await process.run();
-
 
       res.json({ model, trainInfo, status: 200 });
     } catch (e) {
@@ -101,10 +111,10 @@ export default (router: Router) => {
         trainStatus: agent.trainStatus
       };
       const trainHistory = await getAgentTrainHistory(uuid);
-      
+
       console.log(trainInfo);
 
-      res.json({ model, trainInfo, status: 200 , trainHistory});
+      res.json({ model, trainInfo, status: 200, trainHistory });
     } catch (e) {
       console.error(e);
     }

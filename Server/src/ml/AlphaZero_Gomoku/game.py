@@ -2,6 +2,7 @@
 """
 @author: Junxiao Song
 """
+from datetime import time
 import random
 
 import numpy as np
@@ -12,6 +13,8 @@ from nn_architecture import get_PVN_from_uuid
 import random
 
 import os
+
+import time
 
 class Board(object):
     """board for the game"""
@@ -186,7 +189,8 @@ class Game(object):
             self.board.do_move(first_move)
             if journal:
                 battle_record["moves"].append((int(first_move//w),int(first_move%w)))
-                print(f"moves: [{start_player+1}, ({first_move//w},{first_move%w})]",flush=True)
+                move = {"action": "move", "player": start_player+1 ,"move": first_move }
+                print(json.dumps(move),flush=True)
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
         while True:
@@ -195,8 +199,10 @@ class Game(object):
             move = player_in_turn.get_action(self.board)
             self.board.do_move(move)
             if journal:
+                print("",flush=True)
                 battle_record["moves"].append((int(move//w), int(move%w)))
-                print(f"moves: [{current_player}: ({move//w},{move%w})]",flush=True)
+                move_ = {"action": "move", "player": current_player ,"move": int(move) }
+                print(json.dumps(move_),flush=True)
             if is_shown:
                 # Display how random the policy is (eps): 0 is greedy, 1 is pure random
                 print(move//self.board.width, move%self.board.width)
@@ -206,7 +212,10 @@ class Game(object):
                 if journal:
                     battle_record["winner"]=int(winner)
                     journal["battle_records"].append(battle_record)
-                    print(f"winner: {current_player}",flush=True)
+                    win = {"action": "winner", "player": current_player}
+                    time.sleep(0.5)
+                    print("",flush=True)
+                    print(json.dumps(win),flush=True)
                     json.dump(journal,open(output_path,"w"))
                 if is_shown:
                     if winner != -1:
@@ -261,22 +270,41 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
     parser.add_argument("-R", "--rounds", type = int, help="How many rounds do you want to play?", default = 1)
     parser.add_argument("-c","--cpu", action="store_true",help="Force to run on CPU, without cuda", default=False)
+    parser.add_argument("--player1")
+    parser.add_argument("--player2")
+    parser.add_argument("--board_width")
+    parser.add_argument("--board_height")
+    parser.add_argument("--n_in_row")
     args = parser.parse_args()
 
-    f = open(args.game_config, encoding='utf-8')
-    data = json.loads(f.read())
-    
-    width = data["board"]["board_width"]
-    height = data["board"]["board_height"]
-    n_in_row = data["board"]["n_in_row"]
-    board = Board(width=width, height=height, n_in_row=n_in_row)
-    game = Game(board)
+    print(args)
 
-    player1_uuid = data["player1"]
-    player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)
+    if args.game_config:
+        f = open(args.game_config, encoding='utf-8')
+        data = json.loads(f.read())
+        
+        width = data["board"]["board_width"]
+        height = data["board"]["board_height"]
+        n_in_row = data["board"]["n_in_row"]
+        board = Board(width=width, height=height, n_in_row=n_in_row)
+        game = Game(board)
 
-    player2_uuid = data["player2"]   
-    player2 = get_PVN_from_uuid(player2_uuid,"best",args.cpu)
+        player1_uuid = data["player1"]
+        player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)
+
+        player2_uuid = data["player2"]   
+        player2 = get_PVN_from_uuid(player2_uuid,"best",args.cpu)
+    else:
+        width = args.board_width
+        height = args.board_height
+        n_in_row = args.n_in_row
+        board = Board(width=width, height=height, n_in_row=n_in_row)
+        game = Game(board)
+        player1_uuid = args.player1
+        player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)
+        player2_uuid = args.player2 
+        player2 = get_PVN_from_uuid(player2_uuid,"best",args.cpu)
+
     random.seed()
     timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
     json_output={"battle_records":[]} #[{"starter":0,"moves":[],"winner":1}]}

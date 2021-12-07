@@ -1,0 +1,27 @@
+{
+  "name": "dum",
+  "board": {
+    "board_width": 6,
+    "board_height": 6,
+    "n_in_row": 4
+  },
+  "nn_type": "GNN",
+  "layers": [
+    {
+      "layer_name": "SAGEConv",
+      "channels": 1,
+      "bias": "True"
+    },
+    {
+      "layer_name": "ReLU"
+    },
+    {
+      "layer_name": "SAGEConv",
+      "channels": 1,
+      "bias": "True"
+    },
+    {
+      "layer_name": "ReLU"
+    }
+  ]
+}

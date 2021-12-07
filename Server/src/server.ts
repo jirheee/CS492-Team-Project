@@ -4,7 +4,6 @@ import { Server as SocketIOServer } from 'socket.io';
 
 import config from './config';
 import { expressLoader, ioLoader, ormLoader } from './loader';
-import PythonSpawner from './ml/pythonSpawner';
 
 class Server {
   public static async start(): Promise<void> {
@@ -29,21 +28,21 @@ class Server {
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r']);
     // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',uuid,'-r','-c']); //Force cpu use
 
-    // 2. game.py - Example of options and thread to run model-to-model battle
-    // For more information of the configuration, look in battle_example.json
-    // .json file may be subjected for change
-    const gameOptions = ['-g', '../battle/battle_example.json'];
-    // var game_options = ['-g', './data/battle_example.json', '-R', '10'];
-    const process = new PythonSpawner(
-      './src/ml/AlphaZero_Gomoku',
-      'game.py',
-      gameOptions
-    );
+    // // 2. game.py - Example of options and thread to run model-to-model battle
+    // // For more information of the configuration, look in battle_example.json
+    // // .json file may be subjected for change
+    // const gameOptions = ['-g', '../battle/battle_example.json'];
+    // // var game_options = ['-g', './data/battle_example.json', '-R', '10'];
+    // const process = new PythonSpawner(
+    //   './src/ml/AlphaZero_Gomoku',
+    //   'game.py',
+    //   gameOptions
+    // );
 
-    // 3. human_play.py - Example of options and thread to play with the model
-    // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','human_play.py', ["-g", "./data/play_example.json"]);
+    // // 3. human_play.py - Example of options and thread to play with the model
+    // // const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','human_play.py', ["-g", "./data/play_example.json"]);
 
-    await process.run().catch(e => console.log(e));
+    // await process.run().catch(e => console.log(e));
   }
 }
 

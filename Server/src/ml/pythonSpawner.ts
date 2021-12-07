@@ -1,4 +1,5 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import { ProcessType } from '../types';
 
 class PythonSpawner {
   private process: ChildProcessWithoutNullStreams;
@@ -9,10 +10,22 @@ class PythonSpawner {
 
   private options: string[];
 
-  constructor(path: string, file: string, options: string[] = []) {
+  private events: { onData: (data: string) => void };
+
+  private processType: ProcessType;
+
+  constructor(
+    path: string,
+    file: string,
+    options: string[] = [],
+    events: { onData: (data: string) => void },
+    processType: ProcessType = ProcessType.Train
+  ) {
     this.path = path;
     this.file = file;
     this.options = options;
+    this.events = events;
+    this.processType = processType;
   }
 
   public run() {
@@ -28,7 +41,7 @@ class PythonSpawner {
       });
 
       this.process.stdout.on('data', data => {
-        console.log(String(data));
+        this.events.onData(String(data));
       });
 
       this.process.stdout.on('exit', () => {

@@ -3,7 +3,7 @@ import D3Game from './d3Game';
 import { Box, Button } from '@chakra-ui/react';
 import { useSocket } from '../lib/socket';
 
-let game: D3Game;
+let game: D3Game | null;
 
 const Game = ({
   boardWidth,
@@ -21,6 +21,13 @@ const Game = ({
   const { socket, connected } = useSocket();
 
   useEffect(() => {
+    return () => {
+      game?.cleanUp();
+      game = null;
+    };
+  }, []);
+
+  useEffect(() => {
     if (connected && game === undefined && socket) {
       const GameProps = {
         boardColor,
@@ -34,8 +41,8 @@ const Game = ({
 
   return (
     <>
-      <Box ref={boardRef} w="full" h="100vh" />
-      <Button onClick={() => game.renderGoStones()}>Render</Button>
+      <Box ref={boardRef} w="100%" h="100%" />
+      <Button onClick={() => game?.cleanUp()}>Render</Button>
     </>
   );
 };

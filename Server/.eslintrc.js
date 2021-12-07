@@ -20,7 +20,9 @@ module.exports = {
     'arrow-body-style': 'off',
     'prefer-arrow-callback': 'off',
     'no-shadow': 'off',
+    'no-unused-vars': 'off',
     '@typescript-eslint/no-shadow': ['error'],
+    '@typescript-eslint/no-unused-vars': ['error'],
     'comma-dangle': ['error', 'never'],
     'import/extensions': ['off'],
     'import/no-unresolved': 'error'

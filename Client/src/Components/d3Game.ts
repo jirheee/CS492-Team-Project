@@ -62,12 +62,26 @@ class D3Game {
     this.myAgentUuid = agentUuid;
 
     socket.emit('StartRandomBattle');
+    this.registerSocketEvents();
   }
 
   public registerSocketEvents() {
     const { socket } = this;
 
-    socket.on('move', () => {});
+    socket.on('Move', ({ player, move }) => {
+      this.board[move] = {
+        index: move,
+        value: player === 1 ? CoordState.WHITE : CoordState.BLACK
+      };
+      this.renderGoStones();
+    });
+
+    socket.on('Winner', d => console.log(d));
+  }
+
+  public cleanUp() {
+    this.svg.selectAll('*').remove();
+    this.svg.remove();
   }
 
   public initializeBoard() {
