@@ -1,6 +1,4 @@
-import { Grid, Button, GridItem, Text, Flex } from '@chakra-ui/react';
-import TrainInfo from '../model/trainInfo';
-import { HyperParameters } from '../model/types';
+import { Grid, Button, GridItem, Flex } from '@chakra-ui/react';
 import NumberInputWithFieldname from './Inputs/NumberInputWithFieldName';
 
 const TrainSettingForm = ({ onSubmit }) => {

@@ -1,10 +1,14 @@
 import { select, path } from 'd3';
-import { Dispatch, SetStateAction } from 'react';
+import { Socket } from 'socket.io-client';
+
+interface Coord {
+  index: number;
+  value: CoordState;
+}
 
 interface D3GameProps {
   boardColor: string;
   boardWidth: number;
-  setBoard: Dispatch<SetStateAction<{ index: number; value: any }[]>>;
 }
 
 export enum CoordState {
@@ -13,18 +17,37 @@ export enum CoordState {
   NONE = 'rgba(0,0,0,0)'
 }
 
+type Move = {
+  player: 1 | 2;
+  move: number;
+};
+
 class D3Game {
   public boardWidth: number;
   public divEl: any;
   public svg: any;
   public boardColor: string;
-  public setBoard: Dispatch<SetStateAction<{ index: number; value: any }[]>>;
+  public socket: Socket;
+  public board: Coord[];
+  public myAgentUuid: string;
 
-  constructor(divEl: any, props: D3GameProps) {
-    const { boardColor, boardWidth, setBoard } = props;
+  constructor(
+    divEl: any,
+    props: D3GameProps,
+    socket: Socket,
+    agentUuid: string
+  ) {
+    const { boardColor, boardWidth } = props;
     this.boardWidth = boardWidth;
     this.divEl = divEl;
-    this.setBoard = setBoard;
+    this.socket = socket;
+    this.board = new Array(boardWidth * boardWidth)
+      .fill(CoordState.NONE)
+      .map((v, i) => {
+        return { index: i, value: v };
+      });
+
+    console.log('D3Game');
 
     this.svg = select(divEl)
       .append('svg')
@@ -35,9 +58,17 @@ class D3Game {
 
     this.boardColor = boardColor;
     this.initializeBoard();
+
+    this.myAgentUuid = agentUuid;
+
+    socket.emit('StartRandomBattle');
   }
 
-  public handleClick() {}
+  public registerSocketEvents() {
+    const { socket } = this;
+
+    socket.on('move', () => {});
+  }
 
   public initializeBoard() {
     const svg = this.svg;
@@ -77,10 +108,12 @@ class D3Game {
       .attr('stroke-width', 1);
   }
 
-  public renderGoStones(board: { index: number; value: CoordState }[]) {
+  public renderGoStones() {
+    this.svg.selectAll('svg > circle').remove();
+
     this.svg
       .selectAll('circle')
-      .data(board)
+      .data(this.board)
       .join(
         enter => enter.append('circle'),
         exit => exit.remove()
@@ -97,15 +130,9 @@ class D3Game {
         select(this).attr('fill', d.value);
       })
       .on('mouseup', (e, d) => {
-        console.log(this.setBoard);
-        this.setBoard(board => {
-          const { index, value } = d;
-          const newBoard = [...board];
-          newBoard[index].value =
-            value === CoordState.NONE ? CoordState.BLACK : value;
-          console.log(newBoard[index]);
-          return newBoard;
-        });
+        const { index, value } = d;
+        console.log(index);
+        this.board[index] = { index, value: CoordState.BLACK };
       });
   }
 }

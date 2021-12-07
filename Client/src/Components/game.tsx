@@ -1,35 +1,43 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { select, path } from 'd3';
-import D3Game, { CoordState } from './d3Game';
-import { Box } from '@chakra-ui/layout';
+import React, { useRef, useEffect } from 'react';
+import D3Game from './d3Game';
+import { Box, Button } from '@chakra-ui/react';
+import { useSocket } from '../lib/socket';
 
 let game: D3Game;
 
-const Game = ({ boardWidth }: { boardWidth: number }) => {
+const Game = ({
+  boardWidth,
+  agentUuid
+}: {
+  boardWidth: number;
+  agentUuid: string;
+}) => {
   const boardColor = 'rgb(218, 179, 79)';
+
+  console.log('Game');
 
   const boardRef = useRef<HTMLDivElement | null>(null);
 
-  const [board, setBoard] = useState(
-    new Array(boardWidth * boardWidth).fill(CoordState.NONE).map((v, i) => {
-      return { index: i, value: v };
-    })
-  );
+  const { socket, connected } = useSocket();
 
   useEffect(() => {
-    if (board && board.length) {
+    if (connected && game === undefined && socket) {
       const GameProps = {
         boardColor,
-        boardWidth,
-        setBoard
+        boardWidth
       };
 
-      game = new D3Game(boardRef.current, GameProps);
-      game.renderGoStones(board);
+      game = new D3Game(boardRef.current, GameProps, socket, agentUuid);
+      game.renderGoStones();
     }
-  }, [board, boardWidth]);
+  }, [connected, boardWidth, socket, agentUuid]);
 
-  return <Box ref={boardRef} w="full" h="100vh" />;
+  return (
+    <>
+      <Box ref={boardRef} w="full" h="100vh" />
+      <Button onClick={() => game.renderGoStones()}>Render</Button>
+    </>
+  );
 };
 
 export default Game;

@@ -5,8 +5,6 @@ import NNConfigForm from '../components/nnConfigForm';
 import NNItemShelf from '../components/nnItemShelf';
 import { createLayer } from '../lib/util';
 import { ConvLayer, GraphConvLayer, Layer, NNType } from '../model/types';
-import Request from '../lib/api/request';
-import axios from 'axios';
 import customAxios from '../lib/api/request';
 
 const AgentCreatePage = () => {

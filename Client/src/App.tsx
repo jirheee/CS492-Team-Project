@@ -14,29 +14,8 @@ import {
   AgentCreatePage,
   AgentManagementPage
 } from './pages';
-import { useSocket } from './lib/socket';
-import { useEffect, useState } from 'react';
-
-import Request from './lib/api/request';
 
 export const App = () => {
-  const [text, setText] = useState('');
-
-  useEffect(() => {
-    Request.get('/status').then(data => {
-      setText(data.data.data);
-    });
-  }, []);
-
-  const { socket, connected } = useSocket();
-  const [socketResponseText, setSocketText] = useState('');
-
-  useEffect(() => {
-    socket?.on('response', (data: Record<string, string>) => {
-      setSocketText(data['time']);
-    });
-  }, [socket, connected]);
-
   return (
     <ChakraProvider theme={theme}>
       {/* <ColorModeSwitcher /> */}
