@@ -196,7 +196,7 @@ class Game(object):
             self.board.do_move(move)
             if journal:
                 battle_record["moves"].append((int(move//w), int(move%w)))
-                print(f"moves: [{self.board.get_current_player()}, {move}]")
+                print(f"moves: [{self.board.get_current_player()}: ({move//w},{move%w})]")
             if is_shown:
                 # Display how random the policy is (eps): 0 is greedy, 1 is pure random
                 print(move//self.board.width, move%self.board.width)
@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--game_config", help = "Game configuration .json file path")
-    parser.add_argument("-R", "--rounds", type = int, help="How many rounds do you want to play?")
+    parser.add_argument("-R", "--rounds", type = int, help="How many rounds do you want to play?", default = 1)
     parser.add_argument("-c","--cpu", action="store_true",help="Force to run on CPU, without cuda", default=False)
     args = parser.parse_args()
 
