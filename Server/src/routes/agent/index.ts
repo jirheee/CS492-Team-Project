@@ -12,8 +12,11 @@ import {
   saveModelJson,
   isValidHyperParameter,
   getAgentTrainInfo,
-  saveTrainInfo
+  saveTrainInfo,
+  getAgentTrainHistory
 } from './logic';
+
+import PythonSpawner from '../../ml/pythonSpawner';
 
 interface TrainModelInterface {
   agentUuid: AgentUUID;
@@ -72,6 +75,9 @@ export default (router: Router) => {
 
       const model = await getAgentModel(agentUuid);
       // TODO: Start Training
+      const process = new PythonSpawner('./src/ml/AlphaZero_Gomoku','train.py', ['-u',agentUuid,'-r']);
+      await process.run();
+
 
       res.json({ model, trainInfo, status: 200 });
     } catch (e) {
@@ -94,10 +100,11 @@ export default (router: Router) => {
         hyperparameters,
         trainStatus: agent.trainStatus
       };
-
+      const trainHistory = await getAgentTrainHistory(uuid);
+      
       console.log(trainInfo);
 
-      res.json({ model, trainInfo, status: 200 });
+      res.json({ model, trainInfo, status: 200 , trainHistory});
     } catch (e) {
       console.error(e);
     }

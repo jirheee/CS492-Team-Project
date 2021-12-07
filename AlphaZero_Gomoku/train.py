@@ -73,19 +73,36 @@ class TrainPipeline():
                            n_in_row=self.n_in_row)
         self.game = Game(self.board)
 
+        # # training params
+        # self.lr = train_config["hyperparameters"]["lr"]
+        # self.buffer_size = train_config["hyperparameters"]["buffer_size"]
+        # self.batch_size = train_config["hyperparameters"]["batch_size"]
+        # self.epochs = train_config["hyperparameters"]["epochs"]
+        # self.eval_rounds = train_config["testparameters"]["eval_rounds"]
+        # self.model_playout = train_config["testparameters"]["model_playout"]  # num of simulations for each move
+        # self.best_win_ratio = train_config["testparameters"]["best_win_ratio"] # Critical when resuming. All previous progress will be lost when not set.
+        
+        # # num of simulations used for the pure mcts, which is used as
+        # # the opponent to evaluate the trained policy
+        # self.pure_mcts_playout_num = train_config["testparameters"]["mcts_playout"]
+        # self.check_freq = train_config["testparameters"]["check_freq"]
+
         # training params
-        self.lr = train_config["hyperparameters"]["lr"]
-        self.buffer_size = train_config["hyperparameters"]["buffer_size"]
-        self.batch_size = train_config["hyperparameters"]["batch_size"]
-        self.epochs = train_config["hyperparameters"]["epochs"]
-        self.eval_rounds = train_config["testparameters"]["eval_rounds"]
-        self.model_playout = train_config["testparameters"]["model_playout"]  # num of simulations for each move
-        self.best_win_ratio = train_config["testparameters"]["best_win_ratio"] # Critical when resuming. All previous progress will be lost when not set.
+        self.lr = train_config["lr"]
+        self.buffer_size = train_config["buffer_size"]
+        self.batch_size = train_config["batch_size"]
+        self.epochs = train_config["epochs"]
+        self.eval_rounds = 10
+        self.model_playout = 400  # num of simulations for each move
+        try:
+            self.best_win_ratio = train_config["testparameters"]["best_win_ratio"] 
+        except KeyError:
+            self.best_win_ratio = 0.0
 
         # num of simulations used for the pure mcts, which is used as
         # the opponent to evaluate the trained policy
-        self.pure_mcts_playout_num = train_config["testparameters"]["mcts_playout"]
-        self.check_freq = train_config["testparameters"]["check_freq"]
+        self.pure_mcts_playout_num = 1000
+        self.check_freq = int((self.epochs **0.5)*3)
         
         self.data_buffer = deque(maxlen=self.buffer_size)
         
@@ -98,15 +115,15 @@ class TrainPipeline():
         
         model_file_path = f"../models/{str(self.uuid)}/curr.model"
         if resume and os.path.exists(model_file_path):
-            print(f"Loading checkpoint from: {str(self.uuid)}")
+            print(f"Loading checkpoint from: {str(self.uuid)}",flush=True)
         else:
             print("Training new checkpoints.", end = " ")
             if os.path.exists(model_file_path):
-                print("Overriding "+model_file_path, end = "")
+                print("Overriding "+model_file_path, end = "",flush=True)
             model_file_path = None
             print(flush=True)
         if force_cpu:
-            print("Forced to use CPU only")
+            print("Forced to use CPU only",flush=True)
 
         self.policy_value_net = PolicyValueNet(self.board_width, self.board_height, model_config["nn_type"], model_config["layers"], model_file = model_file_path,force_cpu=force_cpu)
         self.mcts_player = MCTSPlayer(self.policy_value_net.policy_value_fn,
@@ -123,6 +140,7 @@ class TrainPipeline():
         #       [epoch, win_rate]
         #   ]
         #  }
+        # initialize records
         self.records = {"start":"","train_progression":[],"win_rates":[],"end":""}
         json.dump(self.records,open(self.output_json_path,"w"))
         self.step = 0
@@ -230,11 +248,11 @@ class TrainPipeline():
             try:
                 t.join()
             except KeyboardInterrupt:
-                print("Ignoring a thread")
+                print("Ignoring a thread",flush=True)
                 raise KeyboardInterrupt
         win_ratio = 1.0*(win_cnt[1] + 0.5*win_cnt[-1]) / n_games
-        print("num_playouts:{}, win: {}, lose: {}, tie:{}".format(
-                n_games, win_cnt[1], win_cnt[2], win_cnt[-1]))
+        # print("num_playouts:{}, win: {}, lose: {}, tie:{}".format(
+        #         n_games, win_cnt[1], win_cnt[2], win_cnt[-1]))
         return win_ratio
 
     def run(self):
@@ -242,21 +260,32 @@ class TrainPipeline():
         try:        
             timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
             self.records["start"]=timestamp
+            json.dump(self.records,open(self.output_json_path,"w"))
             start = time.time()
+            # Save at the start of training             
+            self.policy_value_net.save_model(f"../models/"
+                                            f"{self.uuid}/"
+                                            f"curr.model")
+            self.policy_value_net.save_model(f"../models/"
+                                            f"{self.uuid}/"
+                                            f"best.model")
             for ii in range(self.epochs):
                 self.collect_selfplay_data(self.play_batch_size)
                 if len(self.data_buffer) > self.batch_size:
                     loss, entropy, kl = self.policy_update(ii)
+                    elapsed_time = float(round(time.time()-start,2))
+                    print(f"train_progression: [{ii}, {elapsed_time}, {loss}, {entropy}, {kl}]",flush=True)
                     self.records["train_progression"].append([int(ii), # epoch
-                                                            float(round(time.time()-start,2)), # elapsed time
+                                                            elapsed_time, # elapsed time
                                                             float(round(loss,5)),
                                                             float(round(entropy,5)),
-                                                            float(round(kl,5))])
+                                                            float(round(float(kl),5))])
                     json.dump(self.records,open(self.output_json_path,"w"))
                 # check the performance of the current model,
                 # and save the model params
                 if (ii+1) % self.check_freq == 0:
                     win_ratio = self.policy_evaluate(self.eval_rounds)
+                    print(f"win_rates: [{ii}, {win_ratio}]",flush=True)
                     self.records["win_rates"].append([ii,float(round(win_ratio,2))])
                     self.policy_value_net.save_model(f"../models/"
                                                     f"{self.uuid}/"
@@ -267,11 +296,13 @@ class TrainPipeline():
                                                         f"{self.uuid}/"
                                                         f"best.model")
                         
+                        # write best_win_ratio
                         train_config_path = self.io_dir + f"train.json"
                         with open(train_config_path, encoding='utf-8') as f:
                             train_config = json.loads(f.read())
                         train_config["testparameters"]["best_win_ratio"]=win_ratio
                         json.dump(train_config,open(train_config_path, "w",encoding='utf-8'))
+
                         if (self.best_win_ratio == 1.0 and
                                 self.pure_mcts_playout_num < 5000):
                             self.pure_mcts_playout_num += 1000

@@ -34,6 +34,13 @@ export interface HyperParameters {
   epochs: number;
 }
 
+export interface TrainHistory{
+  start: string;
+  train_progression: number[][];
+  win_rates: number[][];
+  end: string;
+}
+
 export enum TrainStatus {
   NOT_TRAINED = 'Not Trained',
   TRAINING = 'Training',
