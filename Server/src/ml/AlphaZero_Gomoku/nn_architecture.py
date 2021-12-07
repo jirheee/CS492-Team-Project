@@ -302,9 +302,9 @@ def get_PVN_from_uuid(uuid:str,model_option:str="best",force_cpu=False):
 
     model_file_path = f"../models/{uuid}/{model_option}.model"
     if os.path.exists(model_file_path):
-        print(f"Loading checkpoint from: {uuid}, {model_option}")
+        print(f"Loading checkpoint from: {uuid}, {model_option}",flush=True)
     else:
-        print(f"{model_option}_model from uuid of {uuid} could not be found")
+        print(f"{model_option}_model from uuid of {uuid} could not be found",flush=True)
         raise
 
     policy_value_net = PolicyValueNet(board_width, board_height, model_config["nn_type"], model_config["layers"], model_file = model_file_path,force_cpu = force_cpu)

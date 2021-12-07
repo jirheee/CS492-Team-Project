@@ -42,7 +42,7 @@ class Eval_Thread(threading.Thread):
             with winner_cnt_lock:
                 self.winner_cnt[winner]+=1
         except KeyboardInterrupt:
-            print(f"Terminating round{self.round}")
+            print(f"Terminating round{self.round}",flush=True)
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -315,7 +315,7 @@ class TrainPipeline():
                                             f"curr.model")
             self.writer.close()
         except KeyboardInterrupt:
-            print('\n\rquit')
+            print('\n\rquit',flush=True)
             # Save at the end of training             
             self.policy_value_net.save_model(f"../models/"
                                             f"{self.uuid}/"

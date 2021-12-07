@@ -35,7 +35,7 @@ class Human(object):
         except Exception as e:
             move = -1
         if move == -1 or move not in board.availables:
-            print("invalid move")
+            print("invalid move",flush=True)
             move = self.get_action(board)
         return move
 
@@ -68,7 +68,7 @@ def run(data,force_cpu = False):
         #start_player = 1
         game.start_play(human, player1, start_player=start_player, is_shown=0)
     except KeyboardInterrupt:
-        print('\n\rquit')
+        print('\n\rquit',flush=True)
 
 
 if __name__ == '__main__':

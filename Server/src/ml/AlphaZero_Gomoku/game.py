@@ -177,7 +177,7 @@ class Game(object):
         players = {p1: player1, p2: player2}
         if journal:
             # initiallize record
-            battle_record = {"starter":int(self.board.get_current_player()),"moves":[],"winner":""}
+            battle_record = {"starter":int(start_player+1),"moves":[],"winner":""}
         # First Move: Random
         w = self.board.width
         h = self.board.height
@@ -185,8 +185,8 @@ class Game(object):
             first_move = random.sample([w*(h//2)-w//2-1, w*(h//2)-w//2,w*(h//2)-w//2+1, w*(h//2)+w//2-1, w*(h//2)+w//2,w*(h//2)+w//2+1], 1)[0]
             self.board.do_move(first_move)
             if journal:
-                battle_record["moves"].append(int(first_move))
-                print(f"moves: [{start_player+1}, {first_move}]")
+                battle_record["moves"].append((int(first_move//w),int(first_move%w)))
+                print(f"moves: [{start_player+1}, ({first_move//w},{first_move%w})]",flush=True)
         if is_shown:
             self.graphic(self.board, player1.player, player2.player)
         while True:
@@ -196,7 +196,7 @@ class Game(object):
             self.board.do_move(move)
             if journal:
                 battle_record["moves"].append((int(move//w), int(move%w)))
-                print(f"moves: [{self.board.get_current_player()}: ({move//w},{move%w})]")
+                print(f"moves: [{current_player}: ({move//w},{move%w})]",flush=True)
             if is_shown:
                 # Display how random the policy is (eps): 0 is greedy, 1 is pure random
                 print(move//self.board.width, move%self.board.width)
@@ -206,7 +206,7 @@ class Game(object):
                 if journal:
                     battle_record["winner"]=int(winner)
                     journal["battle_records"].append(battle_record)
-                    print(f"winner: {self.board.get_current_player()}")
+                    print(f"winner: {current_player}",flush=True)
                     json.dump(journal,open(output_path,"w"))
                 if is_shown:
                     if winner != -1:
@@ -276,14 +276,14 @@ if __name__ == "__main__":
     player1 = get_PVN_from_uuid(player1_uuid,"best",args.cpu)
 
     player2_uuid = data["player2"]   
-    player2 = get_PVN_from_uuid(player2_uuid,"curr",args.cpu)
+    player2 = get_PVN_from_uuid(player2_uuid,"best",args.cpu)
     random.seed()
     timestamp = re.sub(r'[^\w\-_\. ]', '_', datetime.datetime.now().__str__()[2:-7])
     json_output={"battle_records":[]} #[{"starter":0,"moves":[],"winner":1}]}
     player1_shorthand = player1_uuid.split("-")[0]
     player2_shorthand = player2_uuid.split("-")[0]
     output_path = f"../battle_records/{timestamp}-{player1_shorthand}-{player2_shorthand}.json"
-    if os.path.isdir("../battle_records"):
+    if not os.path.isdir("../battle_records"):
         os.mkdir("../battle_records")
     for ii in range(1,args.rounds+1):
         game.start_play(player1,player2,random.randrange(2), is_shown = 0, journal = json_output, output_path=output_path)
