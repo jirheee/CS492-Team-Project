@@ -300,6 +300,7 @@ class TrainPipeline():
                         train_config_path = self.io_dir + f"train.json"
                         with open(train_config_path, encoding='utf-8') as f:
                             train_config = json.loads(f.read())
+                        train_config["testparameters"]={}
                         train_config["testparameters"]["best_win_ratio"]=win_ratio
                         json.dump(train_config,open(train_config_path, "w",encoding='utf-8'))
 
