@@ -274,7 +274,8 @@ class TrainPipeline():
                 if len(self.data_buffer) > self.batch_size:
                     loss, entropy, kl = self.policy_update(ii)
                     elapsed_time = float(round(time.time()-start,2))
-                    print(f"train_progression: [{ii}, {elapsed_time}, {loss}, {entropy}, {kl}]",flush=True)
+                    dump = {"epoch": ii, "elapsed_time": float(elapsed_time), "loss": float(loss), "entropy": float(entropy), "kl": float(kl)}
+                    print(json.dumps(dump),flush=True)
                     self.records["train_progression"].append([int(ii), # epoch
                                                             elapsed_time, # elapsed time
                                                             float(round(loss,5)),
@@ -285,7 +286,8 @@ class TrainPipeline():
                 # and save the model params
                 if (ii+1) % self.check_freq == 0:
                     win_ratio = self.policy_evaluate(self.eval_rounds)
-                    print(f"win_rates: [{ii}, {win_ratio}]",flush=True)
+                    d = {"epoch": ii, "win_ratio": float(win_ratio)}
+                    print(json.dumps(d),flush=True)
                     self.records["win_rates"].append([ii,float(round(win_ratio,2))])
                     self.policy_value_net.save_model(f"../models/"
                                                     f"{self.uuid}/"
@@ -339,3 +341,4 @@ if __name__ == '__main__':
     test_force_cpu = args.cpu
     training_pipeline = TrainPipeline(test_uuid, test_resume, test_force_cpu)
     training_pipeline.run()
+    exit()
