@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Flex, Spinner, Text } from '@chakra-ui/react';
 import { CloseIcon, CheckIcon } from '@chakra-ui/icons';
 import NNBoard from '../components/nnBoard';
@@ -9,20 +9,13 @@ import AgentUuidModal from '../components/agentUuidModal';
 import customAxios from '../lib/api/request';
 import Model from '../model/model';
 import LineChart from '../components/lineChart';
+import { useSocket } from '../lib/socket';
 
 export enum TrainStatus {
   NOT_TRAINED = 'Not Trained',
   TRAINING = 'Training',
   TRAIN_FINISHED = 'Train Finished'
 }
-
-const dummyValidationLossHistory = new Array(50)
-  .fill(0)
-  .map(_ => Math.random() * 100);
-const dummyTrainLossHistory = new Array(50)
-  .fill(0)
-  .map(_ => Math.random() * 100);
-const dummyWinRateHistory = new Array(50).fill(0).map(_ => Math.random() * 100);
 
 const AgentManagementPage = () => {
   const [model, setModel] = useState<Model | undefined>(undefined);
@@ -34,15 +27,29 @@ const AgentManagementPage = () => {
       }
     | undefined
   >();
-  const [trainTrainLossHistory, setTrainLossHistory] = useState<number[]>(
-    dummyTrainLossHistory
-  );
-  const [trainValidationLossHistory, setTrainValidationLossHistory] = useState<
-    number[]
-  >(dummyValidationLossHistory);
-  const [trainWinRateHistory, setTrainWinRateHistory] =
-    useState<number[]>(dummyWinRateHistory);
+  const [trainTrainLossHistory, setTrainLossHistory] = useState<number[]>([]);
+  const [trainWinRateHistory, setTrainWinRateHistory] = useState<number[]>([]);
   const [agentUuid, setAgentUuid] = useState('');
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (
+      modelLoaded &&
+      connected &&
+      agentUuid.length > 0 &&
+      trainInfo &&
+      trainInfo.trainStatus !== TrainStatus.NOT_TRAINED
+    ) {
+      console.log('emit Monitor');
+      socket?.emit('MonitorTrainHistory', { agentUuid });
+      socket?.on('History', ({ trainHistory, winRateHistory }) => {
+        setTrainLossHistory(trainHistory.map(({ loss }) => loss));
+        setTrainWinRateHistory(
+          winRateHistory.map(({ win_ratio }) => win_ratio)
+        );
+      });
+    }
+  }, [modelLoaded, connected, socket, agentUuid, trainInfo]);
 
   const handleGetModel = (uuid: string) => {
     setAgentUuid(uuid);
@@ -138,24 +145,18 @@ const AgentManagementPage = () => {
               {trainInfo?.trainStatus !== TrainStatus.NOT_TRAINED && (
                 <>
                   <LineChart
-                    dataPointsSet={[
-                      trainTrainLossHistory,
-                      trainValidationLossHistory
-                    ]}
+                    dataPointsSet={[trainTrainLossHistory]}
                     title="Train Loss History"
                     labels={trainTrainLossHistory.map((_, i) => i)}
-                    datasetNameSet={['Train Loss', 'Validation Loss']}
-                    borderColorSet={['rgb(255, 99, 132)', 'rgb(53, 162, 235)']}
-                    backgroundColorSet={[
-                      'rgba(255, 99, 132, 0.5)',
-                      'rgba(53, 162, 235, 0.5)'
-                    ]}
+                    datasetNameSet={['Train Loss']}
+                    borderColorSet={['rgb(53, 162, 235)']}
+                    backgroundColorSet={['rgba(53, 162, 235, 0.5)']}
                   />
                   <LineChart
                     dataPointsSet={[trainWinRateHistory]}
                     title="Train Win Rate History"
                     labels={trainWinRateHistory.map((_, i) => i)}
-                    datasetNameSet={[`${model?.name} Train Win Rate History`]}
+                    datasetNameSet={[`Train Win Rate History`]}
                     borderColorSet={['rgb(255, 99, 132)']}
                     backgroundColorSet={['rgba(255, 99, 132, 0.5)']}
                   />
