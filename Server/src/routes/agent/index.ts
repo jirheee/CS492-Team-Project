@@ -18,6 +18,7 @@ import {
 
 import PythonSpawner from '../../ml/pythonSpawner';
 import { ProcessType } from '../../types';
+import TrainManager from '../../manager/trainManager';
 
 interface TrainModelInterface {
   agentUuid: AgentUUID;
@@ -83,11 +84,21 @@ export default (router: Router) => {
         {
           onData: data => {
             console.log(data);
+          },
+          onExit: async () => {
+            console.log('finished training');
+            TrainManager.getInstance().trainingProcess.delete(agentUuid);
+            agent.trainStatus = TrainStatus.TRAIN_FINISHED;
+            await agent.save();
+            console.log(agent);
           }
         },
         ProcessType.Train
       );
-      await process.run();
+
+      TrainManager.getInstance().trainingProcess.set(agentUuid, process);
+
+      process.run().catch(e => console.error(e));
 
       res.json({ model, trainInfo, status: 200 });
     } catch (e) {
