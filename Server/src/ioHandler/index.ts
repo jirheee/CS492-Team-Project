@@ -1,7 +1,10 @@
 import { Server as SocketIOServer } from 'socket.io';
+import Agent from '../entity/agent';
+import TrainManager from '../manager/trainManager';
 import PythonSpawner from '../ml/pythonSpawner';
-import { getAgentModel } from '../routes/agent/logic';
+import { getAgentModel, getAgentTrainHistory } from '../routes/agent/logic';
 import { ProcessType, RandomBattleRequest } from '../types';
+import { TrainStatus } from '../types/nn';
 
 export default (io: SocketIOServer) => {
   io.on('connection', socket => {
@@ -68,16 +71,6 @@ export default (io: SocketIOServer) => {
           ProcessType.Battle
         );
 
-        // let i = 0;
-        // const sendMove = () => {
-        //   console.log(i);
-        //   socket.emit('Move', i);
-        //   i += 1;
-        //   setTimeout(sendMove, 2000);
-        // };
-
-        // setTimeout(sendMove, 2000);
-
         process.run().catch(e => console.log(e));
 
         socket.emit('BattleStart', {
@@ -88,5 +81,43 @@ export default (io: SocketIOServer) => {
         });
       }
     );
+
+    socket.on('MonitorTrainHistory', async ({ agentUuid }) => {
+      const agent = await Agent.findOne(agentUuid);
+      console.log(agent);
+      if (agent?.trainStatus === TrainStatus.TRAIN_FINISHED) {
+        const trainOutput = await getAgentTrainHistory(agentUuid);
+        const { train_progression, win_rates } = trainOutput;
+        socket.emit('History', {
+          trainHistory: train_progression.map(log => {
+            return {
+              epoch: log[0],
+              elapsed_time: log[1],
+              loss: log[2],
+              entropy: log[3],
+              kl: log[4]
+            };
+          }),
+          winRateHistory: win_rates.map(log => {
+            return { epoch: log[0], win_rate: log[1] };
+          })
+        });
+        return;
+      }
+      const trainProcess =
+        TrainManager.getInstance().trainingProcess.get(agentUuid);
+
+      if (trainProcess) {
+        console.log(trainProcess.getTrainingHistory());
+        trainProcess.events.onData = () => {
+          socket.emit('History', {
+            trainHistory: trainProcess.getTrainingHistory(),
+            winRateHistory: trainProcess.getWinRateHistory()
+          });
+        };
+      } else {
+        console.error('No such process');
+      }
+    });
   });
 };
