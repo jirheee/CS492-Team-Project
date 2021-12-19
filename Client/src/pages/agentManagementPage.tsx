@@ -17,6 +17,15 @@ export enum TrainStatus {
   TRAIN_FINISHED = 'Train Finished'
 }
 
+export interface Agent {
+  uuid: string;
+  createdAt: Date;
+  name: string;
+  trainStatus: TrainStatus;
+  win: number;
+  lose: number;
+}
+
 const AgentManagementPage = () => {
   const [model, setModel] = useState<Model | undefined>(undefined);
   const [modelLoaded, setModelLoaded] = useState(false);
@@ -30,6 +39,8 @@ const AgentManagementPage = () => {
   const [trainTrainLossHistory, setTrainLossHistory] = useState<number[]>([]);
   const [trainWinRateHistory, setTrainWinRateHistory] = useState<number[]>([]);
   const [agentUuid, setAgentUuid] = useState('');
+  const [agent, setAgent] = useState<Agent | undefined>();
+
   const { socket, connected } = useSocket();
 
   useEffect(() => {
@@ -43,8 +54,10 @@ const AgentManagementPage = () => {
       console.log('emit Monitor');
       socket?.emit('MonitorTrainHistory', { agentUuid });
       socket?.on('History', ({ trainHistory, winRateHistory }) => {
+        console.log(trainHistory);
+        console.log(winRateHistory);
         setTrainLossHistory(trainHistory.map(({ loss }) => loss));
-        console.log(winRateHistory.map(({ win_rate }) => win_rate));
+
         setTrainWinRateHistory(winRateHistory.map(({ win_rate }) => win_rate));
       });
     }
@@ -54,7 +67,7 @@ const AgentManagementPage = () => {
     setAgentUuid(uuid);
     customAxios.get(`/agent/${uuid}`).then(res => {
       const {
-        data: { model, trainInfo, status }
+        data: { model, trainInfo, status, agent }
       }: {
         data: {
           model: Model;
@@ -63,12 +76,15 @@ const AgentManagementPage = () => {
             trainStatus: TrainStatus;
           };
           status: number;
+          agent: Agent;
         };
       } = res;
       if (status === 200) {
         setModel(model);
         setModelLoaded(true);
         setTrainInfo(trainInfo);
+        console.log(agent);
+        setAgent(agent);
       }
     });
   };
@@ -114,7 +130,7 @@ const AgentManagementPage = () => {
         handleGetModel={handleGetModel}
       />
       <Container maxW={1200} backgroundColor="white" h="full" p={5}>
-        <AgentSummary model={model} trainInfo={trainInfo} />
+        <AgentSummary model={model} trainInfo={trainInfo} agent={agent} />
         <Text fontSize="lg" fontWeight="bold" mb={3} mt={3}>
           Agent Network Architecture
         </Text>

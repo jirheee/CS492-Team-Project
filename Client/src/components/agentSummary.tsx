@@ -1,7 +1,7 @@
 import { Flex, Avatar, Text, Grid, Center } from '@chakra-ui/react';
 import Model from '../model/model';
 import { HyperParameters } from '../model/types';
-import { TrainStatus } from '../pages/agentManagementPage';
+import { Agent, TrainStatus } from '../pages/agentManagementPage';
 
 interface AgentSummaryProps {
   model?: Model;
@@ -9,9 +9,10 @@ interface AgentSummaryProps {
     hyperparameters: HyperParameters;
     trainStatus: TrainStatus;
   };
+  agent?: Agent;
 }
 
-const AgentSummary = ({ model, trainInfo }: AgentSummaryProps) => {
+const AgentSummary = ({ model, trainInfo, agent }: AgentSummaryProps) => {
   return (
     <Grid templateColumns="repeat(5, 1fr)">
       {/* Avatar Picture and Name */}
@@ -52,8 +53,9 @@ const AgentSummary = ({ model, trainInfo }: AgentSummaryProps) => {
       {/* battle information */}
       <Flex flexDir="column">
         <Text fontWeight="bold">Battle Info</Text>
-        <Text>Ranking</Text>
-        <Text>10W 10L (50%)</Text>
+        <Text>
+          {agent?.win}W {agent?.lose}L
+        </Text>
       </Flex>
     </Grid>
   );
