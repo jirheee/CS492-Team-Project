@@ -29,12 +29,6 @@ Main features are:
 
 <br>
 
-## 📋 How to use Interactive RL Playground
-
-If you want to learn how to use RL playground - [How to use](https://github.com/jirheee/CS492-Team-Project/blob/main/How_To_Use.md)
-
-<br>
-
 ## 🖥 How to launch the project
 **Dependencies**
 - [**NodeJS**](https://nodejs.org/en/) 16.13.1 LTS
@@ -72,7 +66,38 @@ $ yarn start
 
 5️⃣ Go to http://localhost:3000, you will be able to build, train, test your own agent!
 
+## 🗂 Directory Structure
 
+### Frontend
+```
+Client
+|-public
+|-src
+ |-config          // Configurations & Constants
+ |-components      // React components
+ |-lib             // Utility functions
+ |-model           // ML Data type interfaces
+ |-pages           // Pages for routing
+```
+
+### Backend
+```
+Server
+|-src
+ |-config          // Configurations & Constants
+ |-entity          // Typeorm Schema
+ |-ioHandler       // Socket.io handlers
+ |-loader          // Things that run at the start of server
+ |-manager         // Global State Managers
+ |-ml              // ML related code, more explained below
+ |-routes          // Express.js routes
+ |-types           // typescript types
+```
+
+### ML
+```
+
+```
 
 --------
 **2021 KAIST Fall Semester** &middot; CS492(I) - Intro to DL
