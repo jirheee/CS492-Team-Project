@@ -5,4 +5,5 @@ export enum ProcessType {
 
 export interface RandomBattleRequest {
   agentUuid: string;
+  opponent: 'Random' | string;
 }
