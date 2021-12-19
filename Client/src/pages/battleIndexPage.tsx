@@ -1,26 +1,94 @@
-import { useEffect } from 'react';
+import { Flex, Text } from '@chakra-ui/react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import BaseIndexPage from '../components/baseIndexPage';
-import HoverBtn from '../components/hoverBtn';
+import SelectInputWithFieldName from '../components/Inputs/SelectInputWithFieldName';
+import TextInputWithFieldName from '../components/Inputs/textInputWithFieldName';
 import { useSocket } from '../lib/socket';
+
+enum OpponentType {
+  Random = 'Random',
+  Choose = 'Choose'
+}
 
 const BattleIndexPage = () => {
   const { socket } = useSocket();
+  const [opponentType, setOpponentType] = useState<OpponentType>(
+    OpponentType.Random
+  );
+  const [myAgent, setMyAgent] = useState<string>('');
+  const [opponent, setOpponent] = useState<string>('');
 
   const emitRandomBattleStart = () => {
-    console.log('Emit');
-    socket?.emit('RandomBattleStart', {
-      agentUuid: '80895d19-1a04-4821-b57c-2264ac7d3194'
+    socket?.emit('BattleStart', {
+      agentUuid: myAgent,
+      opponent: opponentType === OpponentType.Random ? 'Random' : opponent
     });
   };
+
+  const handleOpponentTypeChange = e => {
+    const newOpponentType = e.target.value;
+    if (newOpponentType !== opponentType) {
+      setOpponentType(newOpponentType);
+    }
+  };
   return (
-    <BaseIndexPage>
-      <Link to="/battle/game" onClick={emitRandomBattleStart}>
-        <HoverBtn baseText="Random" hoverText="Battle with Random Opponent" />
+    <>
+      <BaseIndexPage>
+        <TextInputWithFieldName
+          label="My Agent Uuid"
+          key="My Agent Uuid"
+          id="My Agent Uuid"
+          placeholder=""
+          onChange={e => {
+            setMyAgent(e.target.value);
+          }}
+        />
+        <SelectInputWithFieldName
+          id=""
+          label="Oponent Type"
+          onChange={handleOpponentTypeChange}
+        >
+          <option value="Random">Random</option>
+          <option value="Choose">Choose</option>
+        </SelectInputWithFieldName>
+        {opponentType === OpponentType.Choose && (
+          <TextInputWithFieldName
+            label="Opponent Uuid"
+            key="Opponent Uuid"
+            id="Opponent Uuid"
+            placeholder=""
+            onChange={e => {
+              setOpponent(e.target.value);
+            }}
+          />
+        )}
+      </BaseIndexPage>
+      <Link to="/battle/game">
+        <Flex alignItems="center" justifyContent="center" flexDir="column">
+          <Flex
+            alignItems="center"
+            justifyContent="center"
+            flexDir="column"
+            w="500px"
+            h="400px"
+            backgroundColor="gray.100"
+            p={5}
+            borderRadius={20}
+            borderColor="gray.200"
+            borderWidth={3}
+            _hover={{
+              background: 'red.100',
+              color: 'teal.500',
+              cursor: 'pointer'
+            }}
+            onClick={emitRandomBattleStart}
+          >
+            <Text fontSize="60px">🔥Start Battle🔥</Text>
+          </Flex>
+        </Flex>
       </Link>
-      <HoverBtn baseText="Choose" hoverText="Choose an Agent to Battle" />
-      <HoverBtn baseText="Yourself" hoverText="Battle with your Agent" />
-    </BaseIndexPage>
+    </>
   );
 };
 
