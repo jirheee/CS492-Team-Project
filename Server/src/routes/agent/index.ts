@@ -125,7 +125,7 @@ export default (router: Router) => {
 
       console.log(trainInfo);
 
-      res.json({ model, trainInfo, status: 200, trainHistory });
+      res.json({ model, trainInfo, status: 200, trainHistory, agent });
     } catch (e) {
       console.error(e);
     }
