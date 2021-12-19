@@ -120,5 +120,10 @@ Alphazero_Gomoku
 |-human_play       // for testing RL agent with human
 ```
 
+## Final Report
+
+[🔖Final Report](./Team-10-Final-Project-Report.pdf")
+
+
 --------
 **2021 KAIST Fall Semester** &middot; CS492(I) - Intro to DL
