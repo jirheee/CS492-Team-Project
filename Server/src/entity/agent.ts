@@ -20,4 +20,10 @@ export default class Agent extends BaseEntity {
 
   @Column({ default: TrainStatus.NOT_TRAINED })
   public trainStatus: TrainStatus;
+
+  @Column({ default: 0 })
+  public win: number;
+
+  @Column({ default: 0 })
+  public lose: number;
 }
