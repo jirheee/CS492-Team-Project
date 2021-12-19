@@ -23,9 +23,24 @@ Artificial Intelligence(AI) is a term that is being used more and more everyday.
 
 Main features are:
 1. Build own RL agent that plays `Gomoku`
-2. Train the agent to learn how to play Gomoku
-3. Monitor the training process of the agent
-4. Battle with Gomoku agents that are created by others
+
+
+https://user-images.githubusercontent.com/65358599/146670057-db97626a-cb45-42b9-9af3-e387dd714d85.mov
+
+
+2. Train the agent to learn how to play Gomoku and monitor train process
+
+
+https://user-images.githubusercontent.com/65358599/146670087-234442fe-1d94-41ef-9b02-bbf267e8556d.mov
+
+
+3. Battle with Gomoku agents that are created by others
+
+
+https://user-images.githubusercontent.com/65358599/146670146-4856d1e8-67ff-45ca-8e56-2909d19da694.mov
+
+
+
 
 <br>
 
