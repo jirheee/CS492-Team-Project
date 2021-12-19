@@ -59,7 +59,7 @@ export default (io: SocketIOServer) => {
           String(n_in_row)
         ];
 
-        const onData = (data: string) => {
+        const onData = async (data: string) => {
           console.log(data);
           // socket.emit('Move', move);
           try {
@@ -71,6 +71,20 @@ export default (io: SocketIOServer) => {
             if (parsedObject.action === 'winner') {
               const { player } = parsedObject;
               socket.emit('Winner', { player });
+
+              const winner = await Agent.findOne(
+                player === 1 ? agentUuid : opponentUuid
+              );
+
+              winner!.win += 1;
+
+              await winner?.save();
+
+              const loser = await Agent.findOne(
+                player === 1 ? opponentUuid : agentUuid
+              );
+              loser!.lose += 1;
+              await loser?.save();
             }
           } catch (e) {
             console.log('err');
@@ -89,7 +103,7 @@ export default (io: SocketIOServer) => {
 
         socket.emit('BattleStart', {
           player1: name,
-          player2: randomAgent.name,
+          player2: (await Agent.findOne(opponentUuid))?.name,
           board_width,
           n_in_row
         });
