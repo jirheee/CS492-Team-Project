@@ -44,9 +44,8 @@ const AgentManagementPage = () => {
       socket?.emit('MonitorTrainHistory', { agentUuid });
       socket?.on('History', ({ trainHistory, winRateHistory }) => {
         setTrainLossHistory(trainHistory.map(({ loss }) => loss));
-        setTrainWinRateHistory(
-          winRateHistory.map(({ win_ratio }) => win_ratio)
-        );
+        console.log(winRateHistory.map(({ win_rate }) => win_rate));
+        setTrainWinRateHistory(winRateHistory.map(({ win_rate }) => win_rate));
       });
     }
   }, [modelLoaded, connected, socket, agentUuid, trainInfo]);
