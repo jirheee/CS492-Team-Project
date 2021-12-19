@@ -111,7 +111,13 @@ Server
 
 ### ML
 ```
-
+Alphazero_Gomoku
+|-game             // Game Environment
+|-nn_architecture  // Build RL agent with user's options
+|-train            // Train RL agent
+|-mcts_pure        // Monte Carlo Tree Search(MCTS) Implementation
+|-mcts_alphaZero   // AlphaZero Implementation
+|-human_play       // for testing RL agent with human
 ```
 
 --------
