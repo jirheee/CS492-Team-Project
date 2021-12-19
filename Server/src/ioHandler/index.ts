@@ -1,4 +1,5 @@
 import { Server as SocketIOServer } from 'socket.io';
+import { Not } from 'typeorm';
 import Agent from '../entity/agent';
 import TrainManager from '../manager/trainManager';
 import PythonSpawner from '../ml/pythonSpawner';
@@ -22,8 +23,8 @@ export default (io: SocketIOServer) => {
     });
 
     socket.on(
-      'RandomBattleStart',
-      async ({ agentUuid }: RandomBattleRequest) => {
+      'BattleStart',
+      async ({ agentUuid, opponent }: RandomBattleRequest) => {
         const model = await getAgentModel(agentUuid);
 
         /* eslint-disable camelcase */
@@ -32,11 +33,24 @@ export default (io: SocketIOServer) => {
           name
         } = model;
 
+        const randomAgent = await (async () => {
+          const agents = await Agent.find({
+            where: { trainStatus: Not(TrainStatus.NOT_TRAINED) }
+          });
+          console.log(agents);
+          return agents[Math.floor(Math.random() * agents.length) - 1];
+        })();
+
+        console.log(randomAgent.name);
+
+        const opponentUuid =
+          opponent === 'Random' ? randomAgent.uuid : opponent;
+
         const gameOptions = [
           '--player1',
           agentUuid,
           '--player2',
-          agentUuid,
+          opponentUuid,
           '--board_width',
           String(board_width),
           '--board_height',
@@ -75,7 +89,7 @@ export default (io: SocketIOServer) => {
 
         socket.emit('BattleStart', {
           player1: name,
-          player2: name,
+          player2: randomAgent.name,
           board_width,
           n_in_row
         });
@@ -88,6 +102,11 @@ export default (io: SocketIOServer) => {
       if (agent?.trainStatus === TrainStatus.TRAIN_FINISHED) {
         const trainOutput = await getAgentTrainHistory(agentUuid);
         const { train_progression, win_rates } = trainOutput;
+        console.log(
+          win_rates.map(log => {
+            return { epoch: log[0], win_rate: log[1] };
+          })
+        );
         socket.emit('History', {
           trainHistory: train_progression.map(log => {
             return {
@@ -109,6 +128,10 @@ export default (io: SocketIOServer) => {
 
       if (trainProcess) {
         console.log(trainProcess.getTrainingHistory());
+        socket.emit('History', {
+          trainHistory: trainProcess.getTrainingHistory(),
+          winRateHistory: trainProcess.getWinRateHistory()
+        });
         trainProcess.events.onData = () => {
           socket.emit('History', {
             trainHistory: trainProcess.getTrainingHistory(),
