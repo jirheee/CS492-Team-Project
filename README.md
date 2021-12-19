@@ -122,7 +122,7 @@ Alphazero_Gomoku
 
 ## Final Report
 
-[🔖Final Report](./Team-10-Final-Project-Report.pdf")
+[🔖Final Report](./Team-10-Final-Project-Report.pdf)
 
 
 --------
